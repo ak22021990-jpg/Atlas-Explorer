@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" role="img" aria-label="Clickable atlas map of United States and Canada">
+  <rect x="0" y="0" width="1000" height="660" fill="#eef4f1"/>
+  <g id="canada" opacity="0.96">
+    <path id="YT" class="atlas-region" data-code="YT" d="M90 42 h104 v78 h-104 Z"/>
+    <path id="NT" class="atlas-region" data-code="NT" d="M204 42 h112 v78 h-112 Z"/>
+    <path id="NU" class="atlas-region" data-code="NU" d="M326 42 h170 v78 h-170 Z"/>
+    <path id="BC" class="atlas-region" data-code="BC" d="M90 130 h104 v102 h-104 Z"/>
+    <path id="AB" class="atlas-region" data-code="AB" d="M204 130 h104 v102 h-104 Z"/>
+    <path id="SK" class="atlas-region" data-code="SK" d="M318 130 h104 v102 h-104 Z"/>
+    <path id="MB" class="atlas-region" data-code="MB" d="M432 130 h104 v102 h-104 Z"/>
+    <path id="ON" class="atlas-region" data-code="ON" d="M546 146 h124 v108 h-124 Z"/>
+    <path id="QC" class="atlas-region" data-code="QC" d="M680 126 h132 v124 h-132 Z"/>
+    <path id="NB" class="atlas-region" data-code="NB" d="M822 218 h52 v46 h-52 Z"/>
+    <path id="NS" class="atlas-region" data-code="NS" d="M884 238 h72 v38 h-72 Z"/>
+    <path id="PE" class="atlas-region" data-code="PE" d="M884 198 h54 v30 h-54 Z"/>
+    <path id="NL" class="atlas-region" data-code="NL" d="M844 110 h112 v78 h-112 Z"/>
+  </g>
+  <g id="usa" opacity="0.98">
+    <path id="WA" class="atlas-region" data-code="WA" d="M92 302 h88 v54 h-88 Z"/>
+    <path id="OR" class="atlas-region" data-code="OR" d="M92 364 h88 v54 h-88 Z"/>
+    <path id="CA" class="atlas-region" data-code="CA" d="M92 426 h88 v112 h-88 Z"/>
+    <path id="ID" class="atlas-region" data-code="ID" d="M190 334 h82 v72 h-82 Z"/>
+    <path id="NV" class="atlas-region" data-code="NV" d="M190 414 h82 v90 h-82 Z"/>
+    <path id="AZ" class="atlas-region" data-code="AZ" d="M190 512 h82 v82 h-82 Z"/>
+    <path id="MT" class="atlas-region" data-code="MT" d="M282 302 h90 v54 h-90 Z"/>
+    <path id="WY" class="atlas-region" data-code="WY" d="M282 364 h90 v54 h-90 Z"/>
+    <path id="UT" class="atlas-region" data-code="UT" d="M282 426 h90 v68 h-90 Z"/>
+    <path id="CO" class="atlas-region" data-code="CO" d="M382 426 h90 v68 h-90 Z"/>
+    <path id="NM" class="atlas-region" data-code="NM" d="M282 502 h90 v92 h-90 Z"/>
+    <path id="ND" class="atlas-region" data-code="ND" d="M382 302 h86 v54 h-86 Z"/>
+    <path id="SD" class="atlas-region" data-code="SD" d="M382 364 h86 v54 h-86 Z"/>
+    <path id="NE" class="atlas-region" data-code="NE" d="M382 502 h86 v54 h-86 Z"/>
+    <path id="KS" class="atlas-region" data-code="KS" d="M478 502 h86 v54 h-86 Z"/>
+    <path id="OK" class="atlas-region" data-code="OK" d="M478 564 h98 v48 h-98 Z"/>
+    <path id="TX" class="atlas-region" data-code="TX" d="M586 564 h126 v74 h-126 Z"/>
+    <path id="MN" class="atlas-region" data-code="MN" d="M478 302 h78 v54 h-78 Z"/>
+    <path id="IA" class="atlas-region" data-code="IA" d="M478 364 h78 v54 h-78 Z"/>
+    <path id="MO" class="atlas-region" data-code="MO" d="M478 426 h78 v68 h-78 Z"/>
+    <path id="AR" class="atlas-region" data-code="AR" d="M574 502 h78 v54 h-78 Z"/>
+    <path id="LA" class="atlas-region" data-code="LA" d="M722 590 h72 v48 h-72 Z"/>
+    <path id="WI" class="atlas-region" data-code="WI" d="M566 322 h70 v58 h-70 Z"/>
+    <path id="IL" class="atlas-region" data-code="IL" d="M566 388 h70 v72 h-70 Z"/>
+    <path id="MS" class="atlas-region" data-code="MS" d="M662 558 h62 v80 h-62 Z"/>
+    <path id="MI" class="atlas-region" data-code="MI" d="M646 302 h78 v68 h-78 Z"/>
+    <path id="IN" class="atlas-region" data-code="IN" d="M646 378 h60 v70 h-60 Z"/>
+    <path id="KY" class="atlas-region" data-code="KY" d="M646 456 h92 v46 h-92 Z"/>
+    <path id="TN" class="atlas-region" data-code="TN" d="M662 510 h118 v40 h-118 Z"/>
+    <path id="AL" class="atlas-region" data-code="AL" d="M734 558 h62 v80 h-62 Z"/>
+    <path id="OH" class="atlas-region" data-code="OH" d="M716 378 h62 v70 h-62 Z"/>
+    <path id="WV" class="atlas-region" data-code="WV" d="M748 456 h58 v46 h-58 Z"/>
+    <path id="GA" class="atlas-region" data-code="GA" d="M806 550 h72 v66 h-72 Z"/>
+    <path id="FL" class="atlas-region" data-code="FL" d="M806 624 h118 v28 h-118 Z"/>
+    <path id="SC" class="atlas-region" data-code="SC" d="M828 502 h72 v40 h-72 Z"/>
+    <path id="NC" class="atlas-region" data-code="NC" d="M806 456 h114 v38 h-114 Z"/>
+    <path id="VA" class="atlas-region" data-code="VA" d="M816 410 h108 v38 h-108 Z"/>
+    <path id="PA" class="atlas-region" data-code="PA" d="M788 348 h100 v54 h-100 Z"/>
+    <path id="NY" class="atlas-region" data-code="NY" d="M792 286 h110 v54 h-110 Z"/>
+    <path id="VT" class="atlas-region" data-code="VT" d="M858 234 h36 v44 h-36 Z"/>
+    <path id="NH" class="atlas-region" data-code="NH" d="M902 234 h36 v44 h-36 Z"/>
+    <path id="ME" class="atlas-region" data-code="ME" d="M906 172 h58 v54 h-58 Z"/>
+    <path id="MA" class="atlas-region" data-code="MA" d="M910 286 h66 v26 h-66 Z"/>
+    <path id="CT" class="atlas-region" data-code="CT" d="M910 320 h36 v24 h-36 Z"/>
+    <path id="RI" class="atlas-region" data-code="RI" d="M954 320 h24 v24 h-24 Z"/>
+    <path id="NJ" class="atlas-region" data-code="NJ" d="M898 352 h34 v50 h-34 Z"/>
+    <path id="DE" class="atlas-region" data-code="DE" d="M932 410 h28 v38 h-28 Z"/>
+    <path id="MD" class="atlas-region" data-code="MD" d="M888 410 h36 v38 h-36 Z"/>
+    <path id="AK" class="atlas-region" data-code="AK" d="M26 564 h116 v72 h-116 Z"/>
+    <path id="HI" class="atlas-region" data-code="HI" d="M154 604 h62 v32 h-62 Z"/>
+  </g>
+</svg>

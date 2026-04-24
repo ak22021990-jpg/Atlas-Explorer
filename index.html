@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Explorer</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body class="app-body">
+    <main class="landing-shell">
+      <section class="entry-panel" aria-labelledby="page-title">
+        <span class="eyebrow">Recruitment geography lab</span>
+        <div class="brand-strip">
+          <div class="brand-mark" aria-hidden="true">AE</div>
+          <div>
+            <h1 id="page-title">Atlas Explorer</h1>
+            <p>US and Canada geography practice for screening agents.</p>
+          </div>
+        </div>
+
+        <div class="readiness-row" aria-label="Training goals">
+          <span><strong>4</strong> mini-games</span>
+          <span><strong>70%</strong> pass line</span>
+          <span><strong>12</strong> stars</span>
+        </div>
+
+        <form id="start-form" class="start-form">
+          <label for="agent-name">Agent Name</label>
+          <input id="agent-name" name="agent-name" type="text" minlength="2" autocomplete="name" required>
+
+          <label for="batch-id">Batch ID</label>
+          <select id="batch-id" name="batch-id" required>
+            <option value="">Loading batches...</option>
+          </select>
+
+          <button id="start-button" class="btn btn-primary" type="submit" disabled>Start</button>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="atlas-stage" aria-label="Atlas mission board">
+        <div class="stage-copy">
+          <span class="eyebrow">Live route</span>
+          <h2>Read the map, beat the clock, bank the score.</h2>
+          <p>Each round moves from quick recognition to applied location judgment.</p>
+        </div>
+
+        <div class="atlas-preview" aria-hidden="true">
+          <img src="maps/north-america.svg" alt="">
+          <span class="route-dot dot-west"></span>
+          <span class="route-dot dot-north"></span>
+          <span class="route-dot dot-east"></span>
+        </div>
+
+        <ol class="challenge-track">
+          <li>
+            <span>01</span>
+            <strong>Crack codes</strong>
+            <small>TX, ON, BC, and the rest</small>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>Pin regions</strong>
+            <small>Click the right state or province</small>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>Sort cities</strong>
+            <small>Match major cities to homes</small>
+          </li>
+          <li>
+            <span>04</span>
+            <strong>Ranger run</strong>
+            <small>Classify broad regions from memory</small>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <script type="module">
+      import { createSession, saveSession } from './js/session.js';
+
+      const form = document.getElementById('start-form');
+      const nameInput = document.getElementById('agent-name');
+      const batchSelect = document.getElementById('batch-id');
+      const startButton = document.getElementById('start-button');
+      const message = document.getElementById('form-message');
+
+      async function loadBatches() {
+        try {
+          const response = await fetch('data/batches.json');
+          if (!response.ok) throw new Error('Batch file unavailable');
+          const batches = await response.json();
+          batchSelect.innerHTML = '<option value="">Select batch</option>';
+          batches.forEach((batch) => {
+            const option = document.createElement('option');
+            option.value = batch;
+            option.textContent = batch;
+            batchSelect.appendChild(option);
+          });
+        } catch (error) {
+          batchSelect.innerHTML = '<option value="">No batches found</option>';
+          message.textContent = 'Ask the trainer to add batch IDs before starting.';
+        }
+        validate();
+      }
+
+      function validate() {
+        const valid = nameInput.value.trim().length >= 2 && batchSelect.value;
+        startButton.disabled = !valid;
+      }
+
+      form.addEventListener('input', validate);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const session = createSession(nameInput.value.trim(), batchSelect.value);
+        saveSession(session);
+        window.location.href = 'game.html';
+      });
+
+      loadBatches();
+    </script>
+  </body>
+</html>
