@@ -1,9 +1,9 @@
- Workflow for building and deploying a Node.js project to GitHub Pages
 name: Build and Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -21,14 +21,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # If you haven't pushed your package-lock.json yet, 
-          # you may need to comment out the line below
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -39,7 +36,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Change this path to 'build' or '.' if your output folder is different
           path: './dist'
 
   deploy:
