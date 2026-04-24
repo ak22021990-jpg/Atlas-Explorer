@@ -30,17 +30,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./dist # Change this to 'build' or '.' if your files are in a different folder
-
-  deploy:
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
+        
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4 Add your specific deployment step here (e.g., GitHub Pages, Firebase, AWS, etc.)
