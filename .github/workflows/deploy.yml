@@ -1,42 +1,54 @@
+ Workflow for building and deploying a Node.js project to GitHub Pages
 name: Build and Deploy
 
 on:
   push:
-    branches: [ "main" ] # Runs whenever you push to the main branch
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
+      - name: Checkout
+        uses: actions/checkout@v4
       
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # If you haven't pushed your package-lock.json yet, 
+          # you may need to comment out the line below
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build project
-      run: npm run build --if-present
+      - name: Build
+        run: npm run build --if-present
 
-    #- name: Build project
-      run: npm run build --if-present
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Change this path to 'build' or '.' if your output folder is different
+          path: './dist'
 
-    - name: Upload production-ready site
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./dist # Change this to 'build' or '.' if your files are in a different folder
-        
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 Add your specific deployment step here (e.g., GitHub Pages, Firebase, AWS, etc.)
-    # Example for GitHub Pages:
-    # - name: Deploy to GitHub Pages
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     publish_dir: ./dist
+        uses: actions/deploy-pages@v4
