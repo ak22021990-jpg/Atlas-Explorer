@@ -73,6 +73,8 @@ export function isAllPassed(session) {
   return session.games.every((game) => game.passed);
 }
 
+// isFlagged: session blocking was removed (unlimited retries). Kept for backward
+// compatibility — callers in results.js check this; they will always get false.
 export function isFlagged(session) {
   return false;
 }

@@ -31,7 +31,7 @@ test('first failure unlocks a retry', () => {
   const outcome = recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
   assertEqual(outcome.status, 'retry');
   assert(shouldRetryGame(session, 0));
-  assert(!session.flagged);
+  assert(!isFlagged(session));
 });
 
 test('multiple failures always return retry', () => {
