@@ -4,6 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node tests/test-scoring.js && node tests/test-session.js && node tests/test-crack-the-code.js && node tests/test-pin-it.js && node tests/test-city-sorter.js && node tests/test-region-ranger.js"
+    "test": "node tests/test-scoring.js && node tests/test-session.js && node tests/test-crack-the-code.js && node tests/test-pin-it.js && node tests/test-city-sorter.js && node tests/test-region-ranger.js && node tests/test-badges.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
   }
 }
