@@ -17,6 +17,8 @@ export function createSession(name, batchId) {
     currentGameIndex: 0,
     completed: false,
     createdAt: new Date().toISOString(),
+    earnedBadges: [],
+    lastKnownRank: null,
     games: GAME_DEFINITIONS.map((game) => ({
       key: game.key,
       label: game.label,
@@ -27,7 +29,8 @@ export function createSession(name, batchId) {
       stars: 0,
       passed: false,
       retryAvailable: false,
-      completed: false
+      completed: false,
+      streakPeak: 0
     }))
   };
 }
@@ -36,6 +39,11 @@ export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
   const index = resolveGameIndex(gameIndexOrKey);
   const game = session.games[index];
   if (!game) throw new Error(`Unknown game: ${gameIndexOrKey}`);
+
+  // Update per-game streakPeak from rawAttempt BEFORE normalizeAttempt strips it
+  if (typeof rawAttempt.streakPeak === 'number') {
+    game.streakPeak = Math.max(game.streakPeak, rawAttempt.streakPeak);
+  }
 
   const attempt = normalizeAttempt(rawAttempt);
   game.attempts.push(attempt);

@@ -1,4 +1,4 @@
-import { suite, test, assert, assertEqual, summary } from './test-runner.js';
+import { suite, test, assert, assertEqual, assertDeepEqual, summary } from './test-runner.js';
 import {
   createSession,
   getSubmissionPayload,
@@ -72,6 +72,30 @@ test('submission payload totals scores and flags', () => {
   assertEqual(getTotalStars(session), 5);
   assertEqual(payload.passFail, 'Pass');
   assertEqual(payload.flagged, 'No');
+});
+
+test('createSession initialises earnedBadges and lastKnownRank', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  assertDeepEqual(session.earnedBadges, []);
+  assertEqual(session.lastKnownRank, null);
+});
+
+test('each game slot initialises streakPeak to 0', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  assert(session.games.every(g => g.streakPeak === 0));
+});
+
+test('recordGameAttempt updates streakPeak from rawAttempt', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  recordGameAttempt(session, 0, { score: 160, correctCount: 16, totalCount: 20, streakPeak: 5 });
+  assertEqual(session.games[0].streakPeak, 5);
+});
+
+test('streakPeak keeps highest value across attempts', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20, streakPeak: 3 });
+  recordGameAttempt(session, 0, { score: 160, correctCount: 16, totalCount: 20, streakPeak: 2 });
+  assertEqual(session.games[0].streakPeak, 3); // keeps the higher value
 });
 
 summary();
