@@ -15,8 +15,6 @@ export function createSession(name, batchId) {
     name,
     batchId,
     currentGameIndex: 0,
-    blocked: false,
-    flagged: false,
     completed: false,
     createdAt: new Date().toISOString(),
     games: GAME_DEFINITIONS.map((game) => ({
@@ -38,7 +36,6 @@ export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
   const index = resolveGameIndex(gameIndexOrKey);
   const game = session.games[index];
   if (!game) throw new Error(`Unknown game: ${gameIndexOrKey}`);
-  if (session.blocked) throw new Error('Session is already blocked');
 
   const attempt = normalizeAttempt(rawAttempt);
   game.attempts.push(attempt);
@@ -53,30 +50,14 @@ export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
     return { status: 'passed', game, attempt, gameIndex: index };
   }
 
-  if (game.attempts.length < 2) {
-    game.score = attempt.score;
-    game.correctCount = attempt.correctCount;
-    game.totalCount = attempt.totalCount;
-    game.stars = 0;
-    game.passed = false;
-    game.retryAvailable = true;
-    return { status: 'retry', game, attempt, gameIndex: index };
-  }
-
-  const best = game.attempts.reduce((winner, item) => {
-    if (item.score > winner.score) return item;
-    if (item.score === winner.score && item.correctCount > winner.correctCount) return item;
-    return winner;
-  }, game.attempts[0]);
-
-  applyFinalAttempt(game, { ...best, passed: false, stars: 0 });
-  game.retryAvailable = false;
-  session.blocked = true;
-  session.flagged = true;
-  session.completed = true;
-  session.currentGameIndex = index;
-
-  return { status: 'blocked', game, attempt, gameIndex: index };
+  // Failed — always allow retry (no attempt cap)
+  game.score = attempt.score;
+  game.correctCount = attempt.correctCount;
+  game.totalCount = attempt.totalCount;
+  game.stars = 0;
+  game.passed = false;
+  game.retryAvailable = true;
+  return { status: 'retry', game, attempt, gameIndex: index };
 }
 
 export function getCurrentGame(session) {
@@ -93,7 +74,7 @@ export function isAllPassed(session) {
 }
 
 export function isFlagged(session) {
-  return Boolean(session.flagged || session.blocked);
+  return false;
 }
 
 export function getTotalScore(session) {

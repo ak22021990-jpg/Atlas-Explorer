@@ -31,17 +31,33 @@ test('first failure unlocks a retry', () => {
   const outcome = recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
   assertEqual(outcome.status, 'retry');
   assert(shouldRetryGame(session, 0));
-  assert(!isFlagged(session));
+  assert(!session.flagged);
 });
 
-test('second failure blocks and keeps best score', () => {
+test('multiple failures always return retry', () => {
   const session = createSession('Priya', 'APR-2026-01');
   recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
-  const outcome = recordGameAttempt(session, 0, { score: 80, correctCount: 8, totalCount: 20 });
-  assertEqual(outcome.status, 'blocked');
-  assertEqual(session.games[0].score, 80);
-  assertEqual(session.games[0].stars, 0);
-  assert(isFlagged(session));
+  const outcome = recordGameAttempt(session, 0, { score: 65, correctCount: 7, totalCount: 20 });
+  assertEqual(outcome.status, 'retry');
+  assert(!session.blocked);
+  assert(!session.flagged);
+});
+
+test('third failure still retries', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
+  recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
+  const outcome = recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
+  assertEqual(outcome.status, 'retry');
+});
+
+test('pass after multiple failures resolves correctly', () => {
+  const session = createSession('Priya', 'APR-2026-01');
+  recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
+  recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20 });
+  const outcome = recordGameAttempt(session, 0, { score: 160, correctCount: 16, totalCount: 20 });
+  assertEqual(outcome.status, 'passed');
+  assertEqual(session.currentGameIndex, 1);
 });
 
 test('submission payload totals scores and flags', () => {
