@@ -278,7 +278,7 @@ function updateTimer(remaining) {
   if (pct < 30) {
     fill.style.background = 'linear-gradient(90deg, var(--red), #ff9a7c)';
   } else {
-    fill.style.background = 'linear-gradient(90deg, var(--amazon-blue), var(--amazon-orange), var(--amber))';
+    fill.style.background = 'linear-gradient(90deg, var(--amz-dark), var(--amz-orange), var(--amz-amber))';
   }
 }
 

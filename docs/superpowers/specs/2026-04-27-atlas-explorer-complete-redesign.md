@@ -6,13 +6,13 @@
 
 ## Overview
 
-Full redesign of all four game screens and the application shell. The arcade/retro theme is replaced with a **Modern Geographic** aesthetic — clean sans-serif typography, muted terrain colors, and a geographic explorer experience. The landing/signup page retains Amazon brand colors to establish brand identity before transitioning into the explorer world.
+Full redesign of all four game screens and the application shell. The arcade/retro theme is replaced with a **Modern Geographic** aesthetic — clean sans-serif typography, muted terrain colors, and a geographic explorer experience. The landing/signup page retains brand colors to establish brand identity before transitioning into the explorer world.
 
 ---
 
 ## Design Principles
 
-1. **Brand at entry, geography in play** — Amazon colors greet users on the landing page; terrain palette takes over once gameplay begins.
+1. **Brand at entry, geography in play** — Brand colors greet users on the landing page; terrain palette takes over once gameplay begins.
 2. **Each game is a terrain** — Code Drop, Pin Rush, City Stack, and Zone Sprint each map to a distinct geographic terrain type with its own accent color and background motif.
 3. **Calm and readable** — Off-white surfaces, dark high-contrast ink on primary text, muted secondary text. No glow effects, no neon.
 4. **CSS-only motifs** — Background terrain patterns are pure CSS (repeating-linear-gradient / radial-gradient). No image assets added.
@@ -21,7 +21,7 @@ Full redesign of all four game screens and the application shell. The arcade/ret
 
 ## Color System
 
-### Amazon Brand Palette (Landing / Signup — `index.html`)
+### Brand Palette (Landing / Signup — `index.html`)
 | Token | Value | Use |
 |-------|-------|-----|
 | `--amz-dark` | `#232F3E` | Page/card background |
@@ -102,7 +102,7 @@ The `data-terrain` attribute persists across the intro screen, active game, and 
 - **`css/retro.css`** — stripped entirely; replaced by `css/geo.css`
 - **`css/styles.css`** — update `:root` CSS custom properties; keep layout grid structure
 - **`css/geo.css`** — new file: full design system, terrain scoping, component rules
-- **`index.html`** — replace `retro.css` link with `geo.css`; apply Amazon brand class to body
+- **`index.html`** — replace `retro.css` link with `geo.css`; apply brand class to body
 - **`game.html`** — replace `retro.css` link with `geo.css`
 - **`js/main.js`** — add `data-terrain` attribute assignment before each game mount
 
@@ -116,7 +116,7 @@ The `data-terrain` attribute persists across the intro screen, active game, and 
 
 ### Game Topbar (`game.html`)
 - Background: `--geo-ink` (`#2D3B2F`)
-- Bottom border: `3px solid #FF9900` (Amazon brand anchor)
+- Bottom border: `3px solid #FF9900` (brand anchor)
 - Brand link: white Inter 700
 - Player summary: `#FEBD69` amber, 0.75rem, Inter 600
 
@@ -150,7 +150,7 @@ The `data-terrain` attribute persists across the intro screen, active game, and 
 
 ## Landing / Signup Page (`index.html`)
 
-The entire landing page uses the Amazon brand palette.
+The entire landing page uses the brand palette.
 
 - **Body background**: `#232F3E`
 - **Entry panel**: `#37475A` surface, `3px solid #FF9900` border-top, white text

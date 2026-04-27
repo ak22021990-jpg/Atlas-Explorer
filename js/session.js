@@ -9,12 +9,13 @@ export const GAME_DEFINITIONS = [
   { key: 'ranger', label: 'Region Ranger', maxScore: 260 }
 ];
 
-export function createSession(name, batchId) {
+export function createSession(name, waveCode, trainerName) {
   return {
     id: `atlas-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     agent: name,
     name,
-    batchId,
+    waveCode,
+    trainerName,
     currentGameIndex: 0,
     completed: false,
     createdAt: new Date().toISOString(),
@@ -103,7 +104,8 @@ export function getTotalStars(session) {
 export function getSubmissionPayload(session) {
   return {
     name: session.name,
-    batchId: session.batchId,
+    waveCode: session.waveCode,
+    trainerName: session.trainerName,
     game1: session.games[0]?.score || 0,
     game2: session.games[1]?.score || 0,
     game3: session.games[2]?.score || 0,

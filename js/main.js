@@ -72,7 +72,7 @@ function renderShell() {
   playerSummary.innerHTML = `
     <span>${escapeHtml(session.agent)}</span>
     <span class="summary-divider">|</span>
-    <span>${escapeHtml(session.batchId)}</span>
+    <span>${escapeHtml(session.waveCode || '')}</span>
     <span class="summary-divider">|</span>
     <span class="summary-score">${score} pts</span>
     <span class="summary-divider">|</span>
@@ -172,7 +172,8 @@ async function handleGameComplete(gameIndex, result) {
 
   await submitAttemptScore({
     agent: session.agent,
-    batchId: session.batchId,
+    waveCode: session.waveCode,
+    trainerName: session.trainerName,
     game: game.key,
     attempt: attemptNumber,
     scorePct: ratio,

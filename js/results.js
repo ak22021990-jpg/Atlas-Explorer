@@ -115,6 +115,20 @@ export function renderBadgeShelf(earnedBadgeIds = [], justEarnedBadgeIds = []) {
   `;
 }
 
+export function badgeIconEmoji(id) {
+  const emojis = {
+    'first-blood': '🚀',
+    'perfect-agent': '💯',
+    'hot-streak': '🔥',
+    'globe-trotter': '🌍',
+    'diamond-agent': '💎',
+    'star-collector': '⭐',
+    'never-quit': '🏅',
+    'speed-run': '⚡'
+  };
+  return emojis[id] || '⭐';
+}
+
 function badgeIcon(id) {
   const icons = {
     'first-blood': 'rocket',
@@ -168,7 +182,7 @@ p{font-size:16px;line-height:1.6;color:#d3d9df}
 </style></head><body><section class="certificate">
 <h1>Atlas Explorer</h1>
 <h2>Certificate of Completion</h2>
-<p>This certifies that <strong>${escapeHtml(session.agent || session.name)}</strong> completed the Atlas Explorer game run for batch <strong>${escapeHtml(session.batchId)}</strong>.</p>
+<p>This certifies that <strong>${escapeHtml(session.agent || session.name)}</strong> completed the Atlas Explorer game run — iCube Wave Code: <strong>${escapeHtml(session.waveCode || '')}</strong>, Trainer: <strong>${escapeHtml(session.trainerName || '')}</strong>.</p>
 <p>Total Score: <strong>${getTotalScore(session)}</strong><br>Stars Earned: <strong>${getTotalStars(session)}/12</strong><br>Date: <strong>${new Date().toLocaleDateString()}</strong></p>
 <div class="stamp">Run complete</div>
 </section></body></html>`;

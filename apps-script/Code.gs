@@ -7,7 +7,7 @@ function doPost(e) {
     appendScore(payload);
     return jsonResponse({
       ok: true,
-      leaderboard: getLeaderboard(payload.batchId)
+      leaderboard: getLeaderboard(payload.waveCode)
     });
   } catch (error) {
     return jsonResponse({
@@ -18,10 +18,10 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  var batchId = e && e.parameter ? e.parameter.batchId : '';
+  var waveCode = e && e.parameter ? e.parameter.waveCode : '';
   return jsonResponse({
     ok: true,
-    leaderboard: getLeaderboard(batchId)
+    leaderboard: getLeaderboard(waveCode)
   });
 }
 
@@ -30,7 +30,8 @@ function appendScore(payload) {
   sheet.appendRow([
     new Date(),
     payload.name || '',
-    payload.batchId || '',
+    payload.waveCode || '',
+    payload.trainerName || '',
     Number(payload.game1 || 0),
     Number(payload.game2 || 0),
     Number(payload.game3 || 0),
@@ -42,28 +43,29 @@ function appendScore(payload) {
   ]);
 }
 
-function getLeaderboard(batchId) {
+function getLeaderboard(waveCode) {
   var values = getSheet().getDataRange().getValues();
   if (values.length <= 1) return [];
 
   return values
     .slice(1)
     .filter(function(row) {
-      return !batchId || row[2] === batchId;
+      return !waveCode || row[2] === waveCode;
     })
     .map(function(row) {
       return {
         timestamp: row[0],
         name: row[1],
-        batchId: row[2],
-        game1: row[3],
-        game2: row[4],
-        game3: row[5],
-        game4: row[6],
-        total: row[7],
-        stars: row[8],
-        passFail: row[9],
-        flagged: row[10]
+        waveCode: row[2],
+        trainerName: row[3],
+        game1: row[4],
+        game2: row[5],
+        game3: row[6],
+        game4: row[7],
+        total: row[8],
+        stars: row[9],
+        passFail: row[10],
+        flagged: row[11]
       };
     })
     .sort(function(a, b) {
@@ -83,7 +85,8 @@ function ensureHeader(sheet) {
   sheet.appendRow([
     'Timestamp',
     'Agent Name',
-    'Batch ID',
+    'iCube Wave Code',
+    'Trainer Name',
     'Game 1 Score',
     'Game 2 Score',
     'Game 3 Score',

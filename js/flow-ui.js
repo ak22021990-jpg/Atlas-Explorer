@@ -3,7 +3,7 @@ export const MOTIVATION_COPY = [
   'You are one cleaner round away from a highlight clip.',
   'Every retry sharpens the route. Go again.',
   'Almost there. One hot streak changes the whole board.',
-  'Amazon Geo Rush rewards the comeback.'
+  'Geo Rush rewards the comeback.'
 ];
 
 export function getMotivationalCopy(attemptNumber) {

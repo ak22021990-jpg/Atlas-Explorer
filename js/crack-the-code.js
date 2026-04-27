@@ -52,7 +52,7 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
         <div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),#ff9a7c);box-shadow:0 0 24px rgba(255,101,119,0.35);opacity:0.9;"></div>
       </div>
       <form id="type-form" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-        <span style="font-family:var(--display-font);font-size:0.92rem;color:var(--amazon-ice);">Type the 2-letter code</span>
+        <span style="font-family:var(--display-font);font-size:0.92rem;color:var(--amz-muted);">Type the 2-letter code</span>
         <input type="text" id="code-input" autocomplete="off" autofocus maxlength="2"
                placeholder="_ _"
                style="text-transform:uppercase;width:240px;text-align:center;font-family:var(--display-font);font-size:2rem;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--ink);padding:14px;letter-spacing:10px;border-radius:22px;">

@@ -8,9 +8,9 @@ const GAME_SHEET_KEYS = {
   ranger: 'region-ranger'
 };
 
-export async function submitAttemptScore({ agent, batchId, game, attempt, scorePct, stars, passed }) {
+export async function submitAttemptScore({ agent, waveCode, trainerName, game, attempt, scorePct, stars, passed }) {
   const gameSlug = GAME_SHEET_KEYS[game] || game;
-  const payload = { agent, batchId, game: gameSlug, attempt, scorePct, stars, passed: Boolean(passed) };
+  const payload = { agent, waveCode, trainerName, game: gameSlug, attempt, scorePct, stars, passed: Boolean(passed) };
 
   if (!isConfigured()) {
     saveLocalScore(payload);

@@ -19,9 +19,9 @@ suite('leaderboard');
 
 test('local fallback aggregates per-attempt rows by agent', () => {
   storage.clear();
-  submitAttemptScore({ agent: 'Anoop', batchId: 'B1', game: 'crack', attempt: 1, scorePct: 0.8, stars: 2, passed: true });
-  submitAttemptScore({ agent: 'Anoop', batchId: 'B1', game: 'pin', attempt: 1, scorePct: 0.6, stars: 0, passed: false });
-  submitAttemptScore({ agent: 'Mina', batchId: 'B2', game: 'crack', attempt: 1, scorePct: 1, stars: 3, passed: true });
+  submitAttemptScore({ agent: 'Anoop', waveCode: 'W1', trainerName: 'T1', game: 'crack', attempt: 1, scorePct: 0.8, stars: 2, passed: true });
+  submitAttemptScore({ agent: 'Anoop', waveCode: 'W1', trainerName: 'T1', game: 'pin', attempt: 1, scorePct: 0.6, stars: 0, passed: false });
+  submitAttemptScore({ agent: 'Mina', waveCode: 'W2', trainerName: 'T2', game: 'crack', attempt: 1, scorePct: 1, stars: 3, passed: true });
 
   const rows = getLocalScores();
   assertEqual(rows[0].agent, 'Mina');

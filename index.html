@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas Explorer | Amazon Geo Rush</title>
+    <title>Atlas Explorer | Geo Rush</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/geo.css">
   </head>
@@ -11,7 +11,7 @@
     <main class="landing-shell">
       <section class="atlas-stage" aria-label="Atlas mission board">
         <div class="stage-copy">
-          <span class="eyebrow">Amazon Geo Rush</span>
+          <span class="eyebrow">Geo Rush</span>
           <h2>Tap fast, stack streaks, and own the map.</h2>
           <p>Four quick-hit geography levels built to feel more like a party run than a training quiz.</p>
         </div>
@@ -48,7 +48,7 @@
       </section>
 
       <section class="entry-panel" aria-labelledby="page-title">
-        <span class="eyebrow">Amazon Originals</span>
+        <span class="eyebrow">Originals</span>
         <div class="brand-strip">
           <div class="progress-ring-wrap" id="progress-ring-wrap" aria-hidden="true">
             <svg class="hidden" id="progress-ring-svg" width="56" height="56" viewBox="0 0 56 56">
@@ -59,7 +59,7 @@
           </div>
           <div>
             <h1 id="page-title">Atlas Explorer</h1>
-            <p>Amazon color energy, fast map rounds, and score-chasing loops made for replay.</p>
+            <p>Bold color energy, fast map rounds, and score-chasing loops made for replay.</p>
           </div>
         </div>
 
@@ -69,21 +69,35 @@
           <span><strong>12</strong> stars max</span>
         </div>
 
-        <section id="returning-badges" class="badge-section hidden" aria-label="Badge shelf preview">
-          <div class="section-heading">
-            <h2 style="margin: 0;">Badge Shelf</h2>
-            <span id="badge-progress">0/8 earned</span>
+        <div id="returning-badges" class="badge-trigger-row hidden">
+          <button id="badge-trigger" class="btn btn-badge-trigger" type="button" aria-haspopup="dialog">
+            <span class="badge-trigger-icons" id="badge-trigger-icons"></span>
+            <span class="badge-trigger-label">
+              <strong>Badge Shelf</strong>
+              <small id="badge-progress">0/8 earned</small>
+            </span>
+            <span class="badge-trigger-arrow">&#8250;</span>
+          </button>
+        </div>
+
+        <div id="badge-modal-overlay" class="badge-modal-overlay hidden" role="dialog" aria-label="Badge shelf" aria-modal="true">
+          <div class="badge-modal">
+            <div class="badge-modal-header">
+              <h2>Badge Shelf</h2>
+              <button id="badge-modal-close" class="btn btn-modal-close" type="button" aria-label="Close">&times;</button>
+            </div>
+            <div id="badge-shelf-mount" class="badge-modal-body"></div>
           </div>
-          <div id="badge-shelf-mount"></div>
-        </section>
+        </div>
 
         <form id="start-form" class="start-form">
           <label for="agent-name">Player Tag</label><input id="agent-name" name="agent-name" type="text" minlength="2" autocomplete="name" required placeholder="Drop your name">
 
-          <label for="batch-id">Batch</label>
-          <select id="batch-id" name="batch-id" required>
-            <option value="">Loading batches...</option>
-          </select>
+          <label for="wave-code">iCube Wave Code</label>
+          <input id="wave-code" name="wave-code" type="text" minlength="2" autocomplete="off" required placeholder="Enter wave code">
+
+          <label for="trainer-name">Name of the Trainer</label>
+          <input id="trainer-name" name="trainer-name" type="text" minlength="2" autocomplete="off" required placeholder="Enter trainer name">
 
           <button id="start-button" class="btn btn-primary btn-arcade" type="submit" disabled>Start the run</button>
           <p id="form-message" class="form-message" role="status"></p>
@@ -93,13 +107,14 @@
 
     <script type="module">
       import { BADGE_DEFS } from './js/badges.js';
-      import { renderBadgeShelf } from './js/results.js';
+      import { renderBadgeShelf, badgeIconEmoji } from './js/results.js';
       import { createSession, loadSession, saveSession } from './js/session.js';
       import { injectLandingParticles } from './js/ui-effects.js';
 
       const form = document.getElementById('start-form');
       const nameInput = document.getElementById('agent-name');
-      const batchSelect = document.getElementById('batch-id');
+      const waveCodeInput = document.getElementById('wave-code');
+      const trainerNameInput = document.getElementById('trainer-name');
       const startButton = document.getElementById('start-button');
       const message = document.getElementById('form-message');
       const progressRingWrap = document.getElementById('progress-ring-wrap');
@@ -108,39 +123,32 @@
       const returningBadges = document.getElementById('returning-badges');
       const badgeShelfMount = document.getElementById('badge-shelf-mount');
       const badgeProgress = document.getElementById('badge-progress');
-
-      async function loadBatches() {
-        try {
-          const response = await fetch('data/batches.json');
-          if (!response.ok) throw new Error('Batch file unavailable');
-          const batches = await response.json();
-          batchSelect.innerHTML = '<option value="">Select batch</option>';
-          batches.forEach((batch) => {
-            const option = document.createElement('option');
-            option.value = batch;
-            option.textContent = batch;
-            batchSelect.appendChild(option);
-          });
-        } catch (error) {
-          batchSelect.innerHTML = '<option value="">No batches found</option>';
-          message.textContent = 'Add a batch list before starting the next run.';
-        }
-        validate();
-      }
+      const badgeTrigger = document.getElementById('badge-trigger');
+      const badgeTriggerIcons = document.getElementById('badge-trigger-icons');
+      const badgeModalOverlay = document.getElementById('badge-modal-overlay');
+      const badgeModalClose = document.getElementById('badge-modal-close');
 
       function validate() {
-        const valid = nameInput.value.trim().length >= 2 && batchSelect.value;
+        const valid =
+          nameInput.value.trim().length >= 2 &&
+          waveCodeInput.value.trim().length >= 2 &&
+          trainerNameInput.value.trim().length >= 2;
         startButton.disabled = !valid;
       }
 
       form.addEventListener('input', validate);
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const session = createSession(nameInput.value.trim(), batchSelect.value);
+        const session = createSession(
+          nameInput.value.trim(),
+          waveCodeInput.value.trim(),
+          trainerNameInput.value.trim()
+        );
         saveSession(session);
         localStorage.setItem('atlas_agent', session.agent);
         window.location.href = 'game.html';
       });
+      validate();
 
       function hydrateReturningAgentUI() {
         const agent = localStorage.getItem('atlas_agent');
@@ -157,12 +165,39 @@
         const earnedBadges = session.earnedBadges || [];
         returningBadges.classList.remove('hidden');
         badgeProgress.textContent = `${earnedBadges.length}/${BADGE_DEFS.length} earned`;
+
+        // Show first 3 earned badge icons in the trigger preview
+        const previewIcons = earnedBadges.slice(0, 3).map((id) => {
+          return `<span class="badge-trigger-icon">${badgeIconEmoji(id)}</span>`;
+        }).join('');
+        badgeTriggerIcons.innerHTML = previewIcons || '<span class="badge-trigger-icon">🏅</span>';
+
+        // Render full shelf into modal body
         badgeShelfMount.innerHTML = renderBadgeShelf(earnedBadges);
       }
 
+      // Modal open/close
+      badgeTrigger.addEventListener('click', () => {
+        badgeModalOverlay.classList.remove('hidden');
+        badgeModalClose.focus();
+      });
+
+      badgeModalClose.addEventListener('click', () => {
+        badgeModalOverlay.classList.add('hidden');
+      });
+
+      badgeModalOverlay.addEventListener('click', (e) => {
+        if (e.target === badgeModalOverlay) badgeModalOverlay.classList.add('hidden');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !badgeModalOverlay.classList.contains('hidden')) {
+          badgeModalOverlay.classList.add('hidden');
+        }
+      });
+
       hydrateReturningAgentUI();
       injectLandingParticles(document.querySelector('.landing-shell'));
-      loadBatches();
     </script>
   </body>
 </html>
