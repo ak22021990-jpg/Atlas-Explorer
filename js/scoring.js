@@ -29,12 +29,20 @@ export function calculateStars(correctCount, totalCount) {
   return 1;
 }
 
-export function normalizeAttempt({ score = 0, correctCount = 0, totalCount = 0 }) {
+export function normalizeAttempt({
+  score = 0,
+  correctCount = 0,
+  totalCount = 0,
+  ratio = percentCorrect(correctCount, totalCount),
+  attemptNumber = 1
+} = {}) {
   const passed = isPassed(correctCount, totalCount);
   return {
     score,
     correctCount,
     totalCount,
+    ratio,
+    attemptNumber,
     passed,
     stars: passed ? calculateStars(correctCount, totalCount) : 0,
     recordedAt: new Date().toISOString()

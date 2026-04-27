@@ -3,46 +3,17 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas Explorer</title>
+    <title>Atlas Explorer | Amazon Geo Rush</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/geo.css">
   </head>
-  <body class="app-body">
+  <body class="app-body amz-theme">
     <main class="landing-shell">
-      <section class="entry-panel" aria-labelledby="page-title">
-        <span class="eyebrow">Recruitment geography lab</span>
-        <div class="brand-strip">
-          <div class="brand-mark" aria-hidden="true">AE</div>
-          <div>
-            <h1 id="page-title">Atlas Explorer</h1>
-            <p>US and Canada geography practice for screening agents.</p>
-          </div>
-        </div>
-
-        <div class="readiness-row" aria-label="Training goals">
-          <span><strong>4</strong> mini-games</span>
-          <span><strong>70%</strong> pass line</span>
-          <span><strong>12</strong> stars</span>
-        </div>
-
-        <form id="start-form" class="start-form">
-          <label for="agent-name">Agent Name</label>
-          <input id="agent-name" name="agent-name" type="text" minlength="2" autocomplete="name" required>
-
-          <label for="batch-id">Batch ID</label>
-          <select id="batch-id" name="batch-id" required>
-            <option value="">Loading batches...</option>
-          </select>
-
-          <button id="start-button" class="btn btn-primary" type="submit" disabled>Start</button>
-          <p id="form-message" class="form-message" role="status"></p>
-        </form>
-      </section>
-
       <section class="atlas-stage" aria-label="Atlas mission board">
         <div class="stage-copy">
-          <span class="eyebrow">Live route</span>
-          <h2>Read the map, beat the clock, bank the score.</h2>
-          <p>Each round moves from quick recognition to applied location judgment.</p>
+          <span class="eyebrow">Amazon Geo Rush</span>
+          <h2>Tap fast, stack streaks, and own the map.</h2>
+          <p>Four quick-hit geography levels built to feel more like a party run than a training quiz.</p>
         </div>
 
         <div class="atlas-preview" aria-hidden="true">
@@ -55,36 +26,88 @@
         <ol class="challenge-track">
           <li>
             <span>01</span>
-            <strong>Crack codes</strong>
-            <small>TX, ON, BC, and the rest</small>
+            <strong>Code Drop</strong>
+            <small>Catch the right state or province code before it lands</small>
           </li>
           <li>
             <span>02</span>
-            <strong>Pin regions</strong>
-            <small>Click the right state or province</small>
+            <strong>Pin Rush</strong>
+            <small>Tap the right target while the map is live</small>
           </li>
           <li>
             <span>03</span>
-            <strong>Sort cities</strong>
-            <small>Match major cities to homes</small>
+            <strong>City Stack</strong>
+            <small>Drag city cards into the right zone for combo points</small>
           </li>
           <li>
             <span>04</span>
-            <strong>Ranger run</strong>
-            <small>Classify broad regions from memory</small>
+            <strong>Zone Sprint</strong>
+            <small>Lock the right region before the timer burns out</small>
           </li>
         </ol>
+      </section>
+
+      <section class="entry-panel" aria-labelledby="page-title">
+        <span class="eyebrow">Amazon Originals</span>
+        <div class="brand-strip">
+          <div class="progress-ring-wrap" id="progress-ring-wrap" aria-hidden="true">
+            <svg class="hidden" id="progress-ring-svg" width="56" height="56" viewBox="0 0 56 56">
+              <circle class="progress-ring-track" cx="28" cy="28" r="24"></circle>
+              <circle class="progress-ring-fill" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+            </svg>
+            <div class="brand-mark ring-mark">AE</div>
+          </div>
+          <div>
+            <h1 id="page-title">Atlas Explorer</h1>
+            <p>Amazon color energy, fast map rounds, and score-chasing loops made for replay.</p>
+          </div>
+        </div>
+
+        <div class="readiness-row" aria-label="Training goals">
+          <span><strong>4</strong> levels</span>
+          <span><strong>70%</strong> to clear</span>
+          <span><strong>12</strong> stars max</span>
+        </div>
+
+        <section id="returning-badges" class="badge-section hidden" aria-label="Badge shelf preview">
+          <div class="section-heading">
+            <h2 style="margin: 0;">Badge Shelf</h2>
+            <span id="badge-progress">0/8 earned</span>
+          </div>
+          <div id="badge-shelf-mount"></div>
+        </section>
+
+        <form id="start-form" class="start-form">
+          <label for="agent-name">Player Tag</label><input id="agent-name" name="agent-name" type="text" minlength="2" autocomplete="name" required placeholder="Drop your name">
+
+          <label for="batch-id">Batch</label>
+          <select id="batch-id" name="batch-id" required>
+            <option value="">Loading batches...</option>
+          </select>
+
+          <button id="start-button" class="btn btn-primary btn-arcade" type="submit" disabled>Start the run</button>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
       </section>
     </main>
 
     <script type="module">
-      import { createSession, saveSession } from './js/session.js';
+      import { BADGE_DEFS } from './js/badges.js';
+      import { renderBadgeShelf } from './js/results.js';
+      import { createSession, loadSession, saveSession } from './js/session.js';
+      import { injectLandingParticles } from './js/ui-effects.js';
 
       const form = document.getElementById('start-form');
       const nameInput = document.getElementById('agent-name');
       const batchSelect = document.getElementById('batch-id');
       const startButton = document.getElementById('start-button');
       const message = document.getElementById('form-message');
+      const progressRingWrap = document.getElementById('progress-ring-wrap');
+      const progressRingSvg = document.getElementById('progress-ring-svg');
+      const progressRingFill = document.querySelector('.progress-ring-fill');
+      const returningBadges = document.getElementById('returning-badges');
+      const badgeShelfMount = document.getElementById('badge-shelf-mount');
+      const badgeProgress = document.getElementById('badge-progress');
 
       async function loadBatches() {
         try {
@@ -100,7 +123,7 @@
           });
         } catch (error) {
           batchSelect.innerHTML = '<option value="">No batches found</option>';
-          message.textContent = 'Ask the trainer to add batch IDs before starting.';
+          message.textContent = 'Add a batch list before starting the next run.';
         }
         validate();
       }
@@ -115,10 +138,32 @@
         event.preventDefault();
         const session = createSession(nameInput.value.trim(), batchSelect.value);
         saveSession(session);
+        localStorage.setItem('atlas_agent', session.agent);
         window.location.href = 'game.html';
       });
 
+      function hydrateReturningAgentUI() {
+        const agent = localStorage.getItem('atlas_agent');
+        const session = loadSession();
+        if (!agent || !session) return;
+
+        const passedGames = (session.games || []).filter((game) => game.passed).length;
+        const pct = passedGames / 4;
+        const circumference = 150.8;
+        progressRingWrap.classList.add('has-progress');
+        progressRingSvg.classList.remove('hidden');
+        progressRingFill.style.strokeDashoffset = String(circumference * (1 - pct));
+
+        const earnedBadges = session.earnedBadges || [];
+        returningBadges.classList.remove('hidden');
+        badgeProgress.textContent = `${earnedBadges.length}/${BADGE_DEFS.length} earned`;
+        badgeShelfMount.innerHTML = renderBadgeShelf(earnedBadges);
+      }
+
+      hydrateReturningAgentUI();
+      injectLandingParticles(document.querySelector('.landing-shell'));
       loadBatches();
     </script>
   </body>
 </html>
+

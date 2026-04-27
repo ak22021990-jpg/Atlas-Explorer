@@ -12,6 +12,7 @@ export const GAME_DEFINITIONS = [
 export function createSession(name, batchId) {
   return {
     id: `atlas-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    agent: name,
     name,
     batchId,
     currentGameIndex: 0,
@@ -30,7 +31,9 @@ export function createSession(name, batchId) {
       passed: false,
       retryAvailable: false,
       completed: false,
-      streakPeak: 0
+      streakPeak: 0,
+      attemptNumber: 0,
+      earnedBadges: []
     }))
   };
 }
@@ -47,6 +50,7 @@ export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
 
   const attempt = normalizeAttempt(rawAttempt);
   game.attempts.push(attempt);
+  game.attemptNumber = attempt.attemptNumber;
 
   if (attempt.passed) {
     applyFinalAttempt(game, attempt);
@@ -64,6 +68,7 @@ export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
   game.totalCount = attempt.totalCount;
   game.stars = 0;
   game.passed = false;
+  game.completed = false;
   game.retryAvailable = true;
   return { status: 'retry', game, attempt, gameIndex: index };
 }
@@ -116,7 +121,20 @@ export function saveSession(session, storage = globalThis.localStorage) {
 
 export function loadSession(storage = globalThis.localStorage) {
   const raw = storage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  const session = JSON.parse(raw);
+  if (!session.agent && session.name) session.agent = session.name;
+  session.earnedBadges = Array.isArray(session.earnedBadges) ? session.earnedBadges : [];
+  session.lastKnownRank = Number.isFinite(session.lastKnownRank) ? session.lastKnownRank : null;
+  session.games = (session.games || []).map((game) => ({
+    streakPeak: 0,
+    attemptNumber: Array.isArray(game.attempts) ? game.attempts.length : 0,
+    earnedBadges: [],
+    ...game,
+    earnedBadges: Array.isArray(game.earnedBadges) ? game.earnedBadges : [],
+    attempts: Array.isArray(game.attempts) ? game.attempts : []
+  }));
+  return session;
 }
 
 export function clearSession(storage = globalThis.localStorage) {
@@ -134,5 +152,6 @@ function applyFinalAttempt(game, attempt) {
   game.totalCount = attempt.totalCount;
   game.stars = attempt.stars;
   game.passed = Boolean(attempt.passed);
+  game.attemptNumber = attempt.attemptNumber;
   game.completed = true;
 }

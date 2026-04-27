@@ -1,0 +1,19 @@
+{
+  "key": "canvaGameAsset",
+  "name": "canva-game-asset",
+  "src": "assets/generated/canva-game-asset.svg",
+  "manifest": "assets/generated/canva-game-asset.json",
+  "sourceFile": "Untitled design.svg",
+  "sourceModifiedAt": "2026-04-25T02:39:45.008Z",
+  "imageMode": "embedded-raster",
+  "viewBox": "0 0 1024.5 576",
+  "width": 1366,
+  "height": 768,
+  "counts": {
+    "image": 2,
+    "embeddedImage": 2,
+    "path": 4,
+    "group": 6,
+    "text": 0
+  }
+}

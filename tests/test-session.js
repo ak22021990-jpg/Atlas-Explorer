@@ -1,6 +1,7 @@
 import { suite, test, assert, assertEqual, assertDeepEqual, summary } from './test-runner.js';
 import {
   createSession,
+  loadSession,
   getSubmissionPayload,
   getTotalScore,
   getTotalStars,
@@ -96,6 +97,21 @@ test('streakPeak keeps highest value across attempts', () => {
   recordGameAttempt(session, 0, { score: 60, correctCount: 6, totalCount: 20, streakPeak: 3 });
   recordGameAttempt(session, 0, { score: 160, correctCount: 16, totalCount: 20, streakPeak: 2 });
   assertEqual(session.games[0].streakPeak, 3); // keeps the higher value
+});
+
+test('loadSession hydrates earned badges and rank defaults', () => {
+  const storage = {
+    getItem() {
+      return JSON.stringify({
+        agent: 'Priya',
+        games: [{ attempts: [] }]
+      });
+    }
+  };
+  const session = loadSession(storage);
+  assertDeepEqual(session.earnedBadges, []);
+  assertEqual(session.lastKnownRank, null);
+  assertEqual(session.games[0].attemptNumber, 0);
 });
 
 summary();

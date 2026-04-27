@@ -1,18 +1,44 @@
 :root {
-  --ink: #172421;
-  --muted: #596963;
-  --paper: #f5efe2;
-  --surface: #fffef9;
-  --line: #d7d0c0;
-  --teal: #0f7b72;
-  --teal-dark: #0a5954;
-  --gold: #d1972a;
-  --coral: #d8664a;
-  --green: #27825b;
-  --blue: #2d6ea7;
-  --navy: #23394f;
-  --sky: #dcebf5;
-  --shadow: 0 18px 46px rgba(23, 36, 33, 0.14);
+  /* Geo Explorer palette */
+  --geo-paper:   #F5F0E8;
+  --geo-ink:     #2D3B2F;
+  --geo-muted:   #5A6B5C;
+  --geo-line:    #D6CDB8;
+  --geo-surface: #FDFAF4;
+
+  /* Amazon Brand palette */
+  --amz-dark:    #232F3E;
+  --amz-orange:  #FF9900;
+  --amz-amber:   #FEBD69;
+  --amz-ink:     #FFFFFF;
+  --amz-muted:   #8D9196;
+  --amz-surface: #37475A;
+
+  /* Terrain accent (default = water/coastal) */
+  --terrain-accent: #4A7C6F;
+
+  /* Font vars referenced by game scripts via var() in inline styles */
+  --display-font: 'Inter', sans-serif;
+  --ui-font:      'Inter', sans-serif;
+
+  /* Backward-compat aliases used by existing styles.css component rules */
+  --ink:      var(--geo-ink);
+  --muted:    var(--geo-muted);
+  --paper:    var(--geo-paper);
+  --surface:  var(--geo-surface);
+  --line:     var(--geo-line);
+  --shadow:   0 18px 46px rgba(45, 59, 47, 0.12);
+
+  /* Updated semantic colors */
+  --teal:      #4A7C6F;
+  --teal-dark: #3D6B3A;
+  --gold:      #C4883A;
+  --coral:     #A64D42;
+  --green:     #3D6B3A;
+  --blue:      #5A6E8C;
+  --navy:      #2D3B2F;
+  --sky:       #EEF4F2;
+  --red:       #C4883A;
 }
 
 * {
@@ -23,12 +49,8 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--ink);
-  background:
-    linear-gradient(135deg, rgba(255, 254, 249, 0.92), rgba(245, 239, 226, 0.98)),
-    repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(15, 123, 114, 0.08) 32px),
-    repeating-linear-gradient(90deg, transparent 0, transparent 31px, rgba(45, 110, 167, 0.07) 32px),
-    var(--paper);
+  color: var(--geo-ink);
+  background: var(--geo-surface);
 }
 
 button,

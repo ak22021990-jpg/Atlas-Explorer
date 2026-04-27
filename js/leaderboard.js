@@ -2,42 +2,29 @@ const APPS_SCRIPT_URL = ''; // Paste your deployed Apps Script /exec URL here
 const LOCAL_LEADERBOARD_KEY = 'atlas-explorer-local-leaderboard';
 
 const GAME_SHEET_KEYS = {
-  crack:  'crack-the-code',
-  pin:    'pin-it',
+  crack: 'crack-the-code',
+  pin: 'pin-it',
   sorter: 'city-sorter',
   ranger: 'region-ranger'
 };
 
-export async function submitScore(payload) {
-  if (!isConfigured()) {
-    return saveLocalScore(payload);
-  }
-
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) throw new Error(`Score submission failed: ${response.status}`);
-  const result = await response.json();
-  return Array.isArray(result) ? result : result.leaderboard || [];
-}
-
 export async function submitAttemptScore({ agent, batchId, game, attempt, scorePct, stars, passed }) {
   const gameSlug = GAME_SHEET_KEYS[game] || game;
+  const payload = { agent, batchId, game: gameSlug, attempt, scorePct, stars, passed: Boolean(passed) };
+
   if (!isConfigured()) {
-    saveLocalScore({ agent, batchId, game: gameSlug, attempt, scorePct, stars, passed });
+    saveLocalScore(payload);
     return;
   }
+
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'submit', agent, batchId, game: gameSlug, attempt, scorePct, stars, passed: Boolean(passed) })
+      body: JSON.stringify({ action: 'submit', ...payload })
     });
   } catch {
-    saveLocalScore({ agent, batchId, game: gameSlug, attempt, scorePct, stars, passed });
+    saveLocalScore(payload);
   }
 }
 
@@ -49,7 +36,9 @@ export async function awardBadge(agent, badgeId, badgeName) {
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'awardBadge', agent, badgeId, badgeName })
     });
-  } catch { /* silent */ }
+  } catch {
+    // Local session state still reflects the unlock.
+  }
 }
 
 export async function fetchBadges(agent) {
@@ -58,9 +47,9 @@ export async function fetchBadges(agent) {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.set('action', 'fetchBadges');
     url.searchParams.set('agent', agent);
-    const res = await fetch(url);
-    const data = await res.json();
-    return (data.badges || []).map(b => b.badgeId);
+    const response = await fetch(url);
+    const data = await response.json();
+    return (data.badges || []).map((badge) => badge.badgeId);
   } catch {
     return [];
   }
@@ -68,16 +57,21 @@ export async function fetchBadges(agent) {
 
 export async function fetchLeaderboard(agent) {
   if (!isConfigured()) {
-    return { top10: [], currentRow: null };
+    const top10 = getLocalScores();
+    const currentRow = top10.find((row) => row.agent === agent) || null;
+    return { top10, currentRow };
   }
+
   try {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.set('action', 'fetchLeaderboard');
     url.searchParams.set('agent', agent);
-    const res = await fetch(url);
-    return await res.json();
+    const response = await fetch(url);
+    return await response.json();
   } catch {
-    return { top10: [], currentRow: null };
+    const top10 = getLocalScores();
+    const currentRow = top10.find((row) => row.agent === agent) || null;
+    return { top10, currentRow };
   }
 }
 
@@ -97,9 +91,9 @@ export function renderLeaderboard(container, rows = [], currentName = '') {
           <span>Games</span>
           <span>Badges</span>
         </div>
-        ${shown.map((row, i) => `
+        ${shown.map((row, index) => `
           <div class="leaderboard-row ${row.agent === currentName ? 'current' : ''}" role="row">
-            <span>${i + 1}</span>
+            <span>${row.rank || index + 1}</span>
             <span>${escapeHtml(row.agent)}</span>
             <span>${row.totalStars}/12</span>
             <span>${row.gamesPassed}/4</span>
@@ -116,16 +110,40 @@ export function isConfigured() {
 }
 
 function saveLocalScore(payload) {
-  const allScores = readLocalScores();
-  allScores.push({ ...payload, timestamp: new Date().toISOString() });
-  localStorage.setItem(LOCAL_LEADERBOARD_KEY, JSON.stringify(allScores));
-  return getLocalScores(payload.batchId);
+  const scores = readLocalScores();
+  scores.push({ ...payload, timestamp: new Date().toISOString() });
+  localStorage.setItem(LOCAL_LEADERBOARD_KEY, JSON.stringify(scores));
 }
 
-function getLocalScores(batchId) {
-  return readLocalScores()
-    .filter((score) => score.batchId === batchId)
-    .sort((a, b) => b.total - a.total || b.stars - a.stars);
+export function getLocalScores() {
+  const totals = new Map();
+
+  readLocalScores().forEach((row) => {
+    if (!row.agent) return;
+    if (!totals.has(row.agent)) {
+      totals.set(row.agent, {
+        agent: row.agent,
+        totalStars: 0,
+        gamesPassed: 0,
+        badgeCount: 0,
+        _gamesPassed: new Set()
+      });
+    }
+    const entry = totals.get(row.agent);
+    entry.totalStars += Number(row.stars) || 0;
+    if (row.passed) entry._gamesPassed.add(row.game);
+  });
+
+  return [...totals.values()]
+    .map((entry, index) => ({
+      agent: entry.agent,
+      totalStars: entry.totalStars,
+      gamesPassed: entry._gamesPassed.size,
+      badgeCount: entry.badgeCount,
+      rank: index + 1
+    }))
+    .sort((a, b) => b.totalStars - a.totalStars || b.gamesPassed - a.gamesPassed || a.agent.localeCompare(b.agent))
+    .map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
 
 function readLocalScores() {

@@ -1,3 +1,5 @@
+import { showStreak, triggerFeedbackFlash } from './ui-effects.js';
+
 const TOTAL_ROUNDS = 4;
 const BUCKETS_PER_ROUND = 3;
 const CITIES_PER_BUCKET = 2;
@@ -57,8 +59,11 @@ export async function mountCitySorter(container, onComplete, options = {}) {
   let currentRound = 0;
   let score = 0;
   let correctCount = 0;
+  let streak = 0;
+  let streakPeak = 0;
   let timer = null;
   let roundStartedAt = 0;
+  let timeRemaining = TIME_PER_ROUND;
   let cardInFlight = null;
   let finished = false;
 
@@ -69,26 +74,26 @@ export async function mountCitySorter(container, onComplete, options = {}) {
     finished = false;
 
     container.innerHTML = `
-      <section class="game-card sorter-card">
+      <section class="game-card arcade-card">
         <div class="game-header">
           <div>
-            <span class="eyebrow">${options.isRetry ? 'Retry' : 'City Sorter'}</span>
-            <h1>Round ${currentRound + 1}</h1>
+            <span class="eyebrow">${options.isRetry ? 'Retry mix' : 'City Stack'}</span>
+            <h1 style="margin:4px 0 0;">Stack the cities</h1>
           </div>
-          <span class="game-progress">${currentRound + 1}/${TOTAL_ROUNDS}</span>
+          <span class="game-progress">Lvl ${currentRound + 1}/${TOTAL_ROUNDS}</span>
         </div>
         <div class="timer-bar"><div id="timer-fill" class="timer-bar-fill"></div></div>
-        <div class="sorter-layout">
-          <div class="city-tray">
+        <div class="kanban-layout">
+          <div class="kanban-tray" id="city-tray">
             ${round.cities.map((city) => `
-              <button class="city-card" type="button" draggable="true" data-city-id="${city.id}">
+              <button class="neon-ticket city-card" type="button" draggable="true" data-city-id="${city.id}">
                 ${escapeHtml(city.name)}
               </button>
             `).join('')}
           </div>
-          <div class="bucket-grid">
+          <div class="kanban-board">
             ${round.buckets.map((bucket) => `
-              <div class="drop-bucket" data-state-code="${bucket.stateCode}">
+              <div class="kanban-column drop-bucket" data-state-code="${bucket.stateCode}">
                 <h2>${escapeHtml(bucket.stateName)}</h2>
               </div>
             `).join('')}
@@ -97,13 +102,72 @@ export async function mountCitySorter(container, onComplete, options = {}) {
       </section>
     `;
 
+    if (!document.getElementById('kanban-anim')) {
+      const style = document.createElement('style');
+      style.id = 'kanban-anim';
+      style.innerHTML = `
+        .kanban-layout { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
+        .kanban-tray {
+          display: flex; flex-wrap: wrap; gap: 10px;
+          min-height: 86px; padding: 16px 18px;
+          background: radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 60%), rgba(8,12,17,0.82);
+          border: 1px solid rgba(255,255,255,0.08);
+          justify-content: center; align-items: center;
+          border-radius: 28px;
+        }
+        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .kanban-column {
+          padding: 16px; min-height: 250px;
+          display: flex; flex-direction: column; gap: 10px;
+          transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+          border-radius: 28px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .kanban-column h2 {
+          font-family: var(--display-font); font-size: 1.1rem;
+          color: var(--ink); line-height: 1.2;
+          padding-bottom: 10px; text-align: center; margin-bottom: 4px;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .kanban-column.hover {
+          border-color: rgba(255,153,0,0.34);
+          transform: translateY(-2px);
+          background: linear-gradient(180deg, rgba(255,153,0,0.12), rgba(255,255,255,0.04));
+        }
+        .neon-ticket {
+          background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+          border: 1px solid rgba(255,255,255,0.1);
+          color: var(--ink); padding: 10px 14px;
+          font-family: var(--ui-font); font-size: 1rem;
+          cursor: grab; text-align: center;
+          transition: transform 0.1s, border-color 0.1s, background 0.1s;
+          display: inline-block; min-width: 100px; border-radius: 18px;
+        }
+        .neon-ticket:hover { transform: translateY(-2px); border-color: rgba(255,153,0,0.35); background: rgba(255,255,255,0.1); }
+        .neon-ticket:active { cursor: grabbing; transform: translate(1px,1px); }
+        .neon-ticket.placed-correct {
+          background: rgba(53,208,127,0.14);
+          color: #ddffe9; border-color: rgba(53,208,127,0.4);
+          cursor: default;
+        }
+        .neon-ticket.bounce { animation: bounce 0.3s ease; border-color: var(--red); color: #ffe2e7; }
+        @keyframes bounce {
+          0%, 100% { transform: translateX(0); }
+          33% { transform: translateX(-7px); }
+          66% { transform: translateX(7px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     bindCards(cityLookup, placed);
     bindBuckets(cityLookup, placed);
     roundStartedAt = Date.now();
     startTimer(() => finishRound(placed.size, false));
   }
 
-  function bindCards(cityLookup) {
+  function bindCards() {
     container.querySelectorAll('.city-card').forEach((card) => {
       card.addEventListener('dragstart', (event) => {
         cardInFlight = card.dataset.cityId;
@@ -112,11 +176,6 @@ export async function mountCitySorter(container, onComplete, options = {}) {
       });
       card.addEventListener('dragend', () => {
         cardInFlight = null;
-      });
-      card.addEventListener('click', () => {
-        const city = cityLookup.get(card.dataset.cityId);
-        card.classList.toggle('selected');
-        card.title = city ? city.name : '';
       });
     });
   }
@@ -137,10 +196,14 @@ export async function mountCitySorter(container, onComplete, options = {}) {
 
         if (isCorrectPlacement(city, bucket.dataset.stateCode)) {
           placed.add(cityIdValue);
+          streak += 1;
+          if (streak > streakPeak) streakPeak = streak;
+          showStreak(streak);
           const card = container.querySelector(`[data-city-id="${cityIdValue}"]`);
           card.draggable = false;
           card.classList.remove('selected');
           card.classList.add('placed-correct');
+          triggerFeedbackFlash(card, 'correct');
           bucket.appendChild(card);
           cardInFlight = null;
           if (placed.size === BUCKETS_PER_ROUND * CITIES_PER_BUCKET) {
@@ -151,7 +214,9 @@ export async function mountCitySorter(container, onComplete, options = {}) {
         }
 
         const card = container.querySelector(`[data-city-id="${cityIdValue}"]`);
+        streak = 0;
         card.classList.add('bounce');
+        triggerFeedbackFlash(card, 'wrong');
         setTimeout(() => card.classList.remove('bounce'), 350);
       });
     });
@@ -160,9 +225,11 @@ export async function mountCitySorter(container, onComplete, options = {}) {
   function startTimer(onExpire) {
     clearInterval(timer);
     let remaining = TIME_PER_ROUND;
+    timeRemaining = remaining;
     updateTimer(remaining);
     timer = setInterval(() => {
       remaining -= 1;
+      timeRemaining = remaining;
       updateTimer(remaining);
       if (remaining <= 0) {
         clearInterval(timer);
@@ -175,16 +242,25 @@ export async function mountCitySorter(container, onComplete, options = {}) {
     if (finished) return;
     finished = true;
     clearInterval(timer);
+    if (!speedBonus && correctInRound === 0) {
+      streak = 0;
+    }
     correctCount += correctInRound;
     score += correctInRound * (10 + (speedBonus ? 3 : 0));
     currentRound += 1;
 
     if (currentRound >= TOTAL_ROUNDS) {
-      onComplete({ score, correctCount, totalCount: TOTAL_ROUNDS * BUCKETS_PER_ROUND * CITIES_PER_BUCKET });
+      onComplete({
+        score,
+        correctCount,
+        totalCount: TOTAL_ROUNDS * BUCKETS_PER_ROUND * CITIES_PER_BUCKET,
+        streakPeak,
+        timerRatio: timeRemaining / TIME_PER_ROUND
+      });
       return;
     }
 
-    setTimeout(renderRound, 650);
+    setTimeout(renderRound, 1000);
   }
 
   renderRound();
@@ -199,7 +275,11 @@ function updateTimer(remaining) {
   if (!fill) return;
   const pct = Math.max(0, (remaining / TIME_PER_ROUND) * 100);
   fill.style.width = `${pct}%`;
-  fill.classList.toggle('warning', pct < 30);
+  if (pct < 30) {
+    fill.style.background = 'linear-gradient(90deg, var(--red), #ff9a7c)';
+  } else {
+    fill.style.background = 'linear-gradient(90deg, var(--amazon-blue), var(--amazon-orange), var(--amber))';
+  }
 }
 
 function shuffle(items) {

@@ -1,4 +1,5 @@
 import { calculatePoints } from './scoring.js';
+import { setRegionAnimationDelays, showStreak, triggerFeedbackFlash } from './ui-effects.js';
 
 const TOTAL_QUESTIONS = 15;
 const TIME_PER_QUESTION = 45;
@@ -27,29 +28,60 @@ export async function mountPinIt(container, onComplete, options = {}) {
   let currentIndex = 0;
   let score = 0;
   let correctCount = 0;
+  let streak = 0;
+  let streakPeak = 0;
   let timer = null;
   let startedAt = 0;
+  let timeRemaining = TIME_PER_QUESTION;
   let locked = false;
 
   function renderQuestion() {
     const question = questions[currentIndex];
     locked = false;
     container.innerHTML = `
-      <section class="game-card map-card">
+      <section class="game-card arcade-card">
         <div class="game-header">
           <div>
-            <span class="eyebrow">${options.isRetry ? 'Retry' : 'Pin It!'}</span>
-            <h1>Click ${escapeHtml(question.name)}</h1>
+            <span class="eyebrow">${options.isRetry ? 'Retry mix' : 'Pin Rush'}</span>
+            <h1 style="margin:4px 0 0;">Find the target</h1>
           </div>
           <span class="game-progress">${currentIndex + 1}/${TOTAL_QUESTIONS}</span>
         </div>
         <div class="timer-bar"><div id="timer-fill" class="timer-bar-fill"></div></div>
-        <div id="atlas-map" class="atlas-map gameplay-mode">${svg}</div>
+
+        <div class="radar-container" style="position:relative;background:radial-gradient(circle at center, rgba(255,255,255,0.05), transparent 55%), rgba(8,12,17,0.88);border:1px solid rgba(255,255,255,0.08);overflow:hidden;box-shadow:inset 0 0 36px rgba(255,255,255,0.04);border-radius:28px;">
+          <div class="radar-sweep" style="position:absolute;top:50%;left:50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 70%,rgba(20,110,180,0.18) 100%);transform-origin:0 0;animation:radar-spin 4s linear infinite;pointer-events:none;z-index:10;"></div>
+          <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);font-family:var(--display-font);font-size:0.95rem;color:var(--ink);z-index:20;pointer-events:none;text-align:center;background:rgba(19,26,34,0.82);padding:10px 16px;border:1px solid rgba(255,255,255,0.08);white-space:nowrap;border-radius:999px;">
+            Target: ${escapeHtml(question.name)}
+          </div>
+          <div id="atlas-map" class="atlas-map gameplay-mode" style="background:transparent;border:none;">${svg}</div>
+        </div>
       </section>
     `;
+
+    if (!document.getElementById('radar-anim')) {
+      const style = document.createElement('style');
+      style.id = 'radar-anim';
+      style.innerHTML = `
+        @keyframes radar-spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-correct {
+          0% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.04); filter: brightness(1.4); }
+          100% { transform: scale(1); filter: brightness(1); }
+        }
+        .atlas-map.gameplay-mode svg { filter: drop-shadow(0 0 8px rgba(20,110,180,0.2)); width: 100%; height: auto; }
+        .atlas-map.gameplay-mode .atlas-region { fill: rgba(255,255,255,0.07); stroke: rgba(255,255,255,0.16); transition: all 0.2s; }
+        .atlas-map.gameplay-mode .atlas-region:hover { fill: rgba(255,153,0,0.18); stroke: rgba(255,184,77,0.8); }
+        .atlas-map.gameplay-mode .atlas-region.correct { fill: rgba(53,208,127,0.22) !important; animation: pulse-correct 0.5s ease-out; }
+        .atlas-map.gameplay-mode .atlas-region.wrong { fill: rgba(255,101,119,0.18) !important; }
+      `;
+      document.head.appendChild(style);
+    }
+
     startedAt = Date.now();
     startTimer();
     bindRegions(question);
+    setRegionAnimationDelays(container);
   }
 
   function bindRegions(question) {
@@ -63,12 +95,12 @@ export async function mountPinIt(container, onComplete, options = {}) {
 
   function startTimer() {
     clearInterval(timer);
-    let remaining = TIME_PER_QUESTION;
-    updateTimer(remaining);
+    timeRemaining = TIME_PER_QUESTION;
+    updateTimer(timeRemaining);
     timer = setInterval(() => {
-      remaining -= 1;
-      updateTimer(remaining);
-      if (remaining <= 0) {
+      timeRemaining -= 1;
+      updateTimer(timeRemaining);
+      if (timeRemaining <= 0) {
         clearInterval(timer);
         handleClick(questions[currentIndex], null);
       }
@@ -80,21 +112,40 @@ export async function mountPinIt(container, onComplete, options = {}) {
     clearInterval(timer);
     const elapsed = (Date.now() - startedAt) / 1000;
     const isCorrect = clickedCode ? checkMapClick(question.code, clickedCode) : false;
-    if (isCorrect) correctCount += 1;
+    if (isCorrect) {
+      correctCount += 1;
+      streak += 1;
+      if (streak > streakPeak) streakPeak = streak;
+      showStreak(streak);
+    } else {
+      streak = 0;
+    }
     score += calculatePoints(isCorrect, elapsed, SPEED_WINDOW);
 
     const clicked = clickedCode ? container.querySelector(`[data-code="${clickedCode}"]`) : null;
     const correct = container.querySelector(`[data-code="${question.code}"]`);
-    if (clicked && !isCorrect) clicked.classList.add('wrong');
-    if (correct) correct.classList.add('correct');
+    if (clicked && !isCorrect) {
+      clicked.classList.add('wrong');
+      triggerFeedbackFlash(clicked, 'wrong');
+    }
+    if (correct) {
+      correct.classList.add('correct');
+      triggerFeedbackFlash(correct, 'correct');
+    }
 
-    setTimeout(nextQuestion, 750);
+    setTimeout(nextQuestion, 1000);
   }
 
   function nextQuestion() {
     currentIndex += 1;
     if (currentIndex >= TOTAL_QUESTIONS) {
-      onComplete({ score, correctCount, totalCount: TOTAL_QUESTIONS });
+      onComplete({
+        score,
+        correctCount,
+        totalCount: TOTAL_QUESTIONS,
+        streakPeak,
+        timerRatio: timeRemaining / TIME_PER_QUESTION
+      });
       return;
     }
     renderQuestion();
@@ -111,24 +162,35 @@ export async function mountPinReview(container, onDone) {
   const stateByCode = new Map(states.map((state) => [state.code, state]));
 
   container.innerHTML = `
-    <section class="game-card map-card review-card">
+    <section class="game-card map-card review-card arcade-card">
       <div class="game-header">
         <div>
-          <span class="eyebrow">Review Map</span>
-          <h1>North America Atlas</h1>
+          <span class="eyebrow">Map review</span>
+          <h1>Explore the atlas</h1>
         </div>
         <button id="finish-review" class="btn btn-primary" type="button">Continue</button>
       </div>
-      <div class="review-layout">
-        <div id="atlas-map" class="atlas-map review-mode">${svg}</div>
-        <aside class="review-details">
+      <div class="review-layout" style="display:grid;grid-template-columns:1fr 280px;gap:16px;">
+        <div id="atlas-map" class="atlas-map review-mode" style="background:transparent;border:none;">${svg}</div>
+        <aside class="review-details" style="padding:20px;color:var(--ink);">
           <span class="eyebrow">Selected</span>
-          <strong id="review-name">Choose a region</strong>
-          <span id="review-meta"></span>
+          <strong id="review-name" style="display:block;margin-top:16px;font-size:1.4rem;">Pick a region</strong>
+          <span id="review-meta" style="display:block;margin-top:12px;color:var(--muted);"></span>
         </aside>
       </div>
     </section>
   `;
+
+  if (!document.getElementById('review-anim')) {
+    const style = document.createElement('style');
+    style.id = 'review-anim';
+    style.innerHTML = `
+      .atlas-map.review-mode svg { width: 100%; height: auto; }
+      .atlas-map.review-mode .atlas-region { fill: rgba(255,255,255,0.07); stroke: rgba(255,255,255,0.16); transition: fill 0.2s; }
+      .atlas-map.review-mode .atlas-region:hover { fill: rgba(255,153,0,0.18); cursor: crosshair; }
+    `;
+    document.head.appendChild(style);
+  }
 
   const name = container.querySelector('#review-name');
   const meta = container.querySelector('#review-meta');
@@ -151,7 +213,11 @@ function updateTimer(remaining) {
   if (!fill) return;
   const pct = Math.max(0, (remaining / TIME_PER_QUESTION) * 100);
   fill.style.width = `${pct}%`;
-  fill.classList.toggle('warning', pct < 30);
+  if (pct < 30) {
+    fill.style.background = 'linear-gradient(90deg, var(--red), #ff9a7c)';
+  } else {
+    fill.style.background = 'linear-gradient(90deg, var(--amazon-blue), var(--amazon-orange), var(--amber))';
+  }
 }
 
 function shuffle(items) {

@@ -1,6 +1,6 @@
 // badges.js — pure badge evaluation, no DOM dependencies
 
-const BADGE_DEFS = [
+export const BADGE_DEFS = [
   { id: 'first-blood',    name: 'First Blood' },
   { id: 'perfect-agent',  name: 'Perfect Agent' },
   { id: 'hot-streak',     name: 'Hot Streak' },
@@ -20,7 +20,7 @@ const BADGE_DEFS = [
  * @param {object} session   - full session object (session.earnedBadges mutated on award)
  * @returns {{ id: string, name: string }[]} newly earned badges
  */
-export function evaluateBadges(gameIndex, result, session) {
+export function evaluateBadges(gameIndex, result, session, ratioOverride) {
   const game     = session.games[gameIndex];
   const allGames = session.games;
   const newBadges = [];
@@ -33,7 +33,9 @@ export function evaluateBadges(gameIndex, result, session) {
     session.earnedBadges.push(id);
   }
 
-  const ratio = result.correctCount / result.totalCount;
+  const ratio = typeof ratioOverride === 'number'
+    ? ratioOverride
+    : result.correctCount / result.totalCount;
 
   // first-blood: only one attempt recorded (this is it)
   if (game.attempts.length === 1) maybeAdd('first-blood');

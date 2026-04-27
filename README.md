@@ -60,4 +60,4 @@ The app is static and can be served from the repository root:
 
 ## Assets
 
-The current build includes a stylized SVG atlas at `maps/north-america.svg`. Optional Canva exports can be added later in `assets/` for branding, badges, result backgrounds, and certificates.
+The current build includes a stylized SVG atlas at `maps/north-america.svg`.

@@ -1,0 +1,1441 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap');
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  --paper:       #0D1117;
+  --surface:     #161D27;
+  --surface2:    #1E2A38;
+  --surface3:    #243040;
+  --ink:         #FFFFFF;
+  --muted:       #8B95A1;
+  --subtle:      #4A5568;
+  --orange:      #FF9900;
+  --orange-dim:  #CC7A00;
+  --amber:       #FEBD69;
+  --teal:        #007185;
+  --teal-light:  #00A8CC;
+  --green:       #1DB954;
+  --red:         #E53E3E;
+  --line:        rgba(255,153,0,0.25);
+  --divider:     #FF9900;
+  --shadow:      0 4px 20px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  --orange-glow: 0 0 12px rgba(255,153,0,0.25);
+}
+
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   BODY — no CRT, no scanlines, no blobs
+   ============================================================ */
+body {
+  font-family: 'Inter', sans-serif;
+  color: #FFFFFF;
+  background: #0D1117;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   TYPOGRAPHY — Press Start 2P headings / Inter body
+   ============================================================ */
+h1,
+h2,
+h3,
+.brand-mark,
+.btn,
+.metric,
+.game-progress,
+.player-summary,
+.attempt-score strong,
+.result-status strong {
+  font-family: 'Press Start 2P', cursive;
+}
+
+h1 {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  line-height: 1.4;
+  margin-bottom: 0.6rem;
+  color: #FFFFFF;
+}
+
+h2 {
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  color: #FF9900;
+}
+
+h3 {
+  font-size: 0.75rem;
+  color: #FEBD69;
+}
+
+p,
+span,
+label,
+input,
+select,
+button,
+.answer-option,
+.region-btn,
+.city-card,
+.leaderboard-row,
+.review-details,
+.submit-status,
+.readiness-row span {
+  font-family: 'Inter', sans-serif;
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #8B95A1;
+}
+
+strong {
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #8B95A1;
+}
+
+/* ============================================================
+   SHELLS
+   ============================================================ */
+.landing-shell,
+.game-shell {
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-shell {
+  align-items: stretch;
+}
+
+/* ============================================================
+   PANELS / CARDS
+   ============================================================ */
+.entry-panel,
+.intro-panel,
+.interstitial-panel,
+.results-panel,
+.game-card {
+  position: relative;
+  background: #161D27;
+  border: 1px solid rgba(255,153,0,0.25);
+  border-top: 3px solid #FF9900;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.entry-panel {
+  padding: 38px;
+}
+
+.game-card,
+.intro-panel,
+.interstitial-panel,
+.results-panel {
+  padding: 28px;
+}
+
+/* Intro / interstitial header wash */
+.intro-panel::before,
+.interstitial-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,153,0,0.07), rgba(254,189,105,0.05), rgba(0,113,133,0.04));
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   ARCADE CARD
+   ============================================================ */
+.arcade-card {
+  background: #1E2A38;
+  border: 2px solid #FF9900;
+  box-shadow: var(--orange-glow), var(--shadow);
+  border-radius: 8px;
+}
+
+/* ============================================================
+   ATLAS STAGE
+   ============================================================ */
+.atlas-stage {
+  display: grid;
+  align-content: space-between;
+  gap: 28px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.atlas-stage::before {
+  content: "";
+  position: absolute;
+  inset: auto -10% -25% -10%;
+  height: 50%;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,153,0,0.05) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(255,153,0,0.05) 0 1px, transparent 1px 72px);
+  transform: perspective(400px) rotateX(60deg);
+  transform-origin: bottom;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   EYEBROW / BADGES / META
+   ============================================================ */
+.eyebrow,
+.intro-meta span,
+.badge-status,
+.attempt-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #007185;
+  color: #007185;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   BRAND ELEMENTS
+   ============================================================ */
+.brand-strip {
+  gap: 18px;
+}
+
+.brand-mark {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background: #FF9900;
+  color: #0D1117;
+  border: 2px solid rgba(255,153,0,0.5);
+  box-shadow: 2px 2px 0 rgba(255,153,0,0.4), var(--orange-glow);
+  animation: brandPulse 2.4s ease-in-out infinite;
+}
+
+.brand-mark.small {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.brand-link {
+  color: #FFFFFF;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+}
+
+.stage-copy h2 {
+  font-family: 'Press Start 2P', cursive;
+  color: #FEBD69;
+  text-shadow: 1px 1px 0 rgba(254,189,105,0.3);
+  max-width: 10ch;
+}
+
+.stage-copy p,
+.mission-brief p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  color: #8B95A1;
+}
+
+/* ============================================================
+   ATLAS PREVIEW
+   ============================================================ */
+.atlas-preview {
+  min-height: 340px;
+  border-radius: 8px;
+  border: 3px solid #FF9900;
+  background: #0D1117;
+  box-shadow:
+    0 0 0 1px rgba(255,153,0,0.15),
+    0 0 24px rgba(255,153,0,0.2),
+    inset 0 0 20px rgba(255,153,0,0.04);
+}
+
+.atlas-preview img {
+  padding: 28px;
+  filter: drop-shadow(0 0 6px rgba(255,153,0,0.4)) brightness(0.9) contrast(1.1);
+  animation: floatMap 5s ease-in-out infinite;
+}
+
+/* ============================================================
+   MAP ROUTE DOTS
+   ============================================================ */
+.route-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.5);
+  animation: dotPing 2.4s ease-out infinite;
+}
+
+.dot-west {
+  background: #FF9900;
+  box-shadow: 0 0 8px rgba(255,153,0,0.5);
+}
+
+.dot-north {
+  background: #FEBD69;
+  box-shadow: 0 0 8px rgba(254,189,105,0.5);
+}
+
+.dot-east {
+  background: #007185;
+  box-shadow: 0 0 8px rgba(0,113,133,0.5);
+}
+
+/* ============================================================
+   CHALLENGE TRACK
+   ============================================================ */
+.challenge-track li {
+  min-height: 132px;
+  padding: 18px;
+  background: var(--surface2);
+  border: 2px solid rgba(255,153,0,0.25);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 rgba(255,153,0,0.2);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.challenge-track li:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,153,0,0.55);
+  box-shadow: 0 8px 24px rgba(255,153,0,0.15);
+}
+
+.challenge-track li:nth-child(1) {
+  border-top: 4px solid #FF9900;
+}
+
+.challenge-track li:nth-child(2) {
+  border-top: 4px solid #FEBD69;
+}
+
+.challenge-track li:nth-child(3) {
+  border-top: 4px solid #007185;
+}
+
+.challenge-track li:nth-child(4) {
+  border-top: 4px solid #1DB954;
+}
+
+.challenge-track strong {
+  font-family: 'Press Start 2P', cursive;
+  color: #FEBD69;
+}
+
+.challenge-track small {
+  font-family: 'Inter', sans-serif;
+  color: #8B95A1;
+}
+
+/* ============================================================
+   READINESS ROW
+   ============================================================ */
+.readiness-row span {
+  min-height: 80px;
+  padding: 16px;
+  border: 2px solid rgba(255,153,0,0.3);
+  background: transparent;
+  border-radius: 8px;
+  color: #8B95A1;
+  font-family: 'Inter', sans-serif;
+  box-shadow: inset 0 0 16px rgba(255,153,0,0.04), 2px 2px 0 rgba(255,153,0,0.15);
+}
+
+.readiness-row strong,
+.metric {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.1rem;
+  color: #FEBD69;
+}
+
+/* ============================================================
+   SCORE PREVIEW
+   ============================================================ */
+.score-preview > div {
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.2);
+  border-radius: 6px;
+}
+
+/* ============================================================
+   FORM / INPUTS
+   ============================================================ */
+.start-form {
+  gap: 14px;
+}
+
+.start-form label {
+  color: #8B95A1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.start-form input,
+.start-form select,
+#code-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 6px;
+  border: 1px solid #4A5568;
+  background: var(--surface2);
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.start-form input::placeholder,
+#code-input::placeholder {
+  color: #4A5568;
+}
+
+.start-form select option {
+  background: #1E2A38;
+  color: #FFFFFF;
+}
+
+.start-form input:focus,
+.start-form select:focus,
+.answer-option:focus,
+.region-btn:focus,
+.btn:focus,
+#code-input:focus {
+  outline: none;
+  border-color: #FF9900;
+  box-shadow: 0 0 0 3px rgba(255,153,0,0.15);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 6px;
+  border: 2px solid #FF9900;
+  background: transparent;
+  color: #FF9900;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,153,0,0.3);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(255,153,0,0.15);
+}
+
+.btn-primary {
+  background: #FF9900;
+  color: #0D1117;
+  border: none;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transform: scale(0);
+  opacity: 1;
+}
+
+.btn-primary:active::after {
+  animation: ripple 0.4s ease-out forwards;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #FF9900;
+  border: 2px solid #FF9900;
+  border-radius: 6px;
+}
+
+.btn-success {
+  background: #1DB954;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+}
+
+button:disabled {
+  opacity: 0.35;
+}
+
+/* ============================================================
+   ANSWER OPTIONS / REGION BUTTONS
+   ============================================================ */
+.answer-option,
+.region-btn {
+  min-height: 70px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.3);
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.answer-option:hover,
+.region-btn:hover {
+  border-color: #FF9900;
+  border-width: 2px;
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 #FF9900;
+}
+
+.answer-option.correct,
+.region-btn.correct {
+  border-left: 4px solid #1DB954 !important;
+  background: rgba(29,185,84,0.1) !important;
+  color: #1DB954 !important;
+}
+
+.answer-option.wrong,
+.region-btn.wrong {
+  border-left: 4px solid #E53E3E !important;
+  background: rgba(229,62,62,0.1) !important;
+  color: #E53E3E !important;
+}
+
+/* Legacy correct/wrong for SVG map */
+.correct {
+  background: rgba(29,185,84,0.1) !important;
+  border-color: #1DB954 !important;
+  color: #1DB954 !important;
+}
+
+.wrong {
+  background: rgba(229,62,62,0.1) !important;
+  border-color: #E53E3E !important;
+  color: #E53E3E !important;
+}
+
+/* ============================================================
+   CITY CARDS
+   ============================================================ */
+.city-card {
+  min-height: 70px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.3);
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+}
+
+.city-card:hover {
+  border-color: #FF9900;
+  transform: translateX(3px);
+  box-shadow: -3px 0 0 #FF9900;
+}
+
+.city-card.selected {
+  border-color: #FF9900;
+  background: rgba(255,153,0,0.08);
+  box-shadow: -3px 0 0 #FF9900;
+}
+
+.city-card.placed-correct {
+  background: rgba(29,185,84,0.08);
+  border-color: #1DB954;
+  color: #1DB954;
+}
+
+/* ============================================================
+   DROP BUCKETS
+   ============================================================ */
+.drop-bucket {
+  border: 2px dashed rgba(255,153,0,0.25);
+  background: rgba(255,153,0,0.02);
+  border-radius: 8px;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.drop-bucket.hover {
+  border-color: #FF9900;
+  background: rgba(255,153,0,0.06);
+}
+
+.drop-bucket h2 {
+  color: #FF9900;
+  border-bottom: 2px solid rgba(255,153,0,0.2);
+}
+
+/* ============================================================
+   REVIEW DETAILS
+   ============================================================ */
+.review-details {
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.3);
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #8B95A1;
+}
+
+.review-details strong {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #FF9900;
+}
+
+/* ============================================================
+   NOTICE
+   ============================================================ */
+.notice {
+  background: rgba(229,62,62,0.08);
+  border: 2px dashed #E53E3E;
+  color: #E53E3E;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+}
+
+/* ============================================================
+   FORM MESSAGE
+   ============================================================ */
+.form-message {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #8B95A1;
+  min-height: 1.5em;
+}
+
+/* ============================================================
+   SUBMIT STATUS
+   ============================================================ */
+.submit-status {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #8B95A1;
+}
+
+/* ============================================================
+   RESULT STATUS
+   ============================================================ */
+.result-status {
+  grid-template-columns: 1fr auto auto;
+  padding: 20px 22px;
+  background: var(--surface2);
+  border-bottom: 1px solid rgba(255,153,0,0.2);
+  border-radius: 8px;
+}
+
+.result-status.pass {
+  border-left: 6px solid #1DB954;
+  box-shadow: inset 8px 0 20px rgba(29,185,84,0.06);
+}
+
+.result-status.fail {
+  border-left: 6px solid #E53E3E;
+  box-shadow: inset 8px 0 20px rgba(229,62,62,0.06);
+}
+
+.result-status span {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #8B95A1;
+}
+
+.result-status strong {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: #FEBD69;
+}
+
+/* ============================================================
+   RESULT CARD
+   ============================================================ */
+.result-card {
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.25);
+  border-radius: 6px;
+}
+
+.result-card p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.result-card p label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  color: #FF9900;
+  text-transform: none;
+}
+
+/* ============================================================
+   RESULTS GRID / SCORE PREVIEW
+   ============================================================ */
+.results-grid,
+.score-preview {
+  gap: 16px;
+}
+
+/* ============================================================
+   ATTEMPT SCORE
+   ============================================================ */
+.attempt-score strong {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #FEBD69;
+}
+
+/* ============================================================
+   METRIC
+   ============================================================ */
+.metric {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: #FEBD69;
+}
+
+/* ============================================================
+   GAME TOPBAR
+   ============================================================ */
+.game-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 18px 22px;
+  margin-bottom: 22px;
+  background: #0D1117;
+  border-bottom: 2px solid #FF9900;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.player-summary {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.55rem;
+  color: #FEBD69;
+}
+
+.summary-score {
+  color: #FEBD69;
+}
+
+.summary-divider {
+  color: rgba(255,255,255,0.24);
+}
+
+/* ============================================================
+   GAME PROGRESS
+   ============================================================ */
+.game-progress {
+  min-width: 90px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 2px solid #FF9900;
+  border-radius: 6px;
+  color: #FF9900;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+}
+
+/* ============================================================
+   TIMER BAR
+   ============================================================ */
+.timer-bar {
+  position: relative;
+  height: 14px;
+  margin-bottom: 22px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid #4A5568;
+  overflow: hidden;
+}
+
+.timer-bar::before {
+  content: "TIME";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.5rem;
+  color: #4A5568;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.timer-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007185, #FF9900, #FEBD69, #FF9900, #007185);
+  background-size: 200% auto;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: timerShimmer 2s linear infinite;
+}
+
+.timer-bar-fill.warning {
+  background: #E53E3E;
+  animation: timerWarning 0.5s ease infinite;
+}
+
+/* ============================================================
+   HUB PANEL
+   ============================================================ */
+.hub-panel {
+  display: grid;
+  grid-template-columns: minmax(340px, 1.1fr) minmax(300px, 0.9fr);
+  gap: 24px;
+  align-items: center;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid rgba(255,153,0,0.25);
+  border-radius: 8px;
+}
+
+.hub-map-container,
+.atlas-map {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hub-map-container {
+  min-height: 360px;
+  border: 2px solid #FF9900;
+  background: #0D1117;
+}
+
+.hub-map-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 24px;
+}
+
+.hub-pin {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid #4A5568;
+  color: #4A5568;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.hub-pin.completed {
+  background: #1DB954;
+  border-color: #1DB954;
+  color: #FFFFFF;
+}
+
+.hub-pin.active {
+  background: #FF9900;
+  border-color: #FFFFFF;
+  color: #0D1117;
+  animation: pulsePin 1.8s ease infinite;
+}
+
+/* ============================================================
+   ATLAS MAP / REGIONS
+   ============================================================ */
+.atlas-map svg {
+  min-width: 760px;
+}
+
+.atlas-map {
+  border: 2px solid #FF9900;
+  background: #0D1117;
+}
+
+.atlas-region {
+  fill: #0D1F2D;
+  stroke: rgba(255,153,0,0.3);
+  stroke-width: 1.5;
+  opacity: 0;
+  animation: regionFadeIn 0.4s ease-out forwards;
+  transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+}
+
+.atlas-region:hover {
+  fill: #162D3D;
+  stroke: #FF9900;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px rgba(255,153,0,0.4));
+}
+
+.atlas-region.correct {
+  fill: rgba(29,185,84,0.2) !important;
+  stroke: #1DB954 !important;
+  stroke-width: 3 !important;
+}
+
+.atlas-region.wrong {
+  fill: rgba(229,62,62,0.15) !important;
+  stroke: #E53E3E !important;
+  stroke-width: 3 !important;
+}
+
+/* nth-child stagger 1-20 at 0.03s increments */
+.atlas-region:nth-child(1)  { animation-delay: 0.03s; }
+.atlas-region:nth-child(2)  { animation-delay: 0.06s; }
+.atlas-region:nth-child(3)  { animation-delay: 0.09s; }
+.atlas-region:nth-child(4)  { animation-delay: 0.12s; }
+.atlas-region:nth-child(5)  { animation-delay: 0.15s; }
+.atlas-region:nth-child(6)  { animation-delay: 0.18s; }
+.atlas-region:nth-child(7)  { animation-delay: 0.21s; }
+.atlas-region:nth-child(8)  { animation-delay: 0.24s; }
+.atlas-region:nth-child(9)  { animation-delay: 0.27s; }
+.atlas-region:nth-child(10) { animation-delay: 0.30s; }
+.atlas-region:nth-child(11) { animation-delay: 0.33s; }
+.atlas-region:nth-child(12) { animation-delay: 0.36s; }
+.atlas-region:nth-child(13) { animation-delay: 0.39s; }
+.atlas-region:nth-child(14) { animation-delay: 0.42s; }
+.atlas-region:nth-child(15) { animation-delay: 0.45s; }
+.atlas-region:nth-child(16) { animation-delay: 0.48s; }
+.atlas-region:nth-child(17) { animation-delay: 0.51s; }
+.atlas-region:nth-child(18) { animation-delay: 0.54s; }
+.atlas-region:nth-child(19) { animation-delay: 0.57s; }
+.atlas-region:nth-child(20) { animation-delay: 0.60s; }
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+.leaderboard-table {
+  background: var(--surface);
+  border: 1px solid rgba(255,153,0,0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.leaderboard-row {
+  min-height: 56px;
+  font-family: 'Inter', sans-serif;
+  color: #8B95A1;
+  border-bottom: 1px solid rgba(255,153,0,0.1);
+  transition: background 0.16s ease;
+}
+
+.leaderboard-row:hover {
+  background: rgba(255,153,0,0.04);
+}
+
+.leaderboard-row.header {
+  background: rgba(255,153,0,0.08);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: #FEBD69;
+}
+
+.leaderboard-row.current {
+  border-left: 4px solid #FF9900;
+  color: #FEBD69;
+  background: rgba(255,153,0,0.06);
+}
+
+/* ============================================================
+   BADGE SHELF / CARD
+   ============================================================ */
+.badge-card,
+.badge-shelf {
+  background: transparent;
+}
+
+.badge-shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.badge-card {
+  min-width: 0;
+  padding: 16px 12px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,153,0,0.2);
+}
+
+.badge-card.earned {
+  box-shadow: 0 0 12px rgba(255,153,0,0.2);
+  border-color: rgba(255,153,0,0.4);
+}
+
+.badge-card.locked {
+  opacity: 0.42;
+  filter: grayscale(0.6);
+}
+
+.badge-name {
+  display: block;
+  margin: 8px 0 6px;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: #FEBD69;
+  font-family: 'Press Start 2P', cursive;
+}
+
+.badge-icon {
+  font-size: 2rem;
+}
+
+.badge-status {
+  margin-top: 10px;
+}
+
+.badge-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: #8B95A1;
+}
+
+/* ============================================================
+   SECTION HEADING
+   ============================================================ */
+.section-heading {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #FF9900;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   STAR STRIP / STAR POP
+   ============================================================ */
+.star-strip,
+.mini-stars {
+  gap: 10px;
+}
+
+.star-pop {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0);
+  animation: starPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  color: rgba(255,255,255,0.16);
+  font-size: 1.4rem;
+}
+
+.star-pop.earned {
+  color: #FEBD69;
+}
+
+/* ============================================================
+   ATTEMPT DOT
+   ============================================================ */
+.attempt-dot.current {
+  border-color: #FF9900;
+}
+
+/* ============================================================
+   PERSONAL BEST / RANK UP
+   ============================================================ */
+.personal-best,
+.rank-up-flash {
+  color: #FEBD69;
+}
+
+/* ============================================================
+   LEGEND PILLS
+   ============================================================ */
+.legend-pill {
+  border: 1px solid rgba(255,255,255,0.15);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+/* ============================================================
+   INTERSTITIAL PANEL STATES
+   ============================================================ */
+.interstitial-panel.pass {
+  border-color: #1DB954;
+}
+
+.interstitial-panel.pass h1 {
+  color: #1DB954;
+}
+
+.interstitial-panel.fail {
+  border-color: #E53E3E;
+}
+
+.interstitial-panel.fail h1 {
+  color: #E53E3E;
+}
+
+.interstitial-panel h1 {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.mission-brief h1,
+.game-header h1,
+.intro-panel h1,
+.interstitial-panel h1 {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+}
+
+/* ============================================================
+   GAME HEADER
+   ============================================================ */
+.game-header {
+  align-items: end;
+}
+
+/* ============================================================
+   BADGE / STREAK TOAST
+   ============================================================ */
+.badge-toast {
+  top: 24px;
+  right: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,153,0,0.3);
+  background: var(--surface2);
+  color: #FFFFFF;
+  box-shadow: var(--shadow);
+}
+
+.streak-badge {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  background: #FF9900;
+  color: #0D1117;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  padding: 8px 14px;
+  border-radius: 6px;
+  z-index: 200;
+  animation: streakIn 0.3s ease forwards, streakOut 0.3s ease 2s forwards;
+}
+
+/* ============================================================
+   PAGE WIPE BAR
+   ============================================================ */
+.page-wipe-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background: #FF9900;
+  z-index: 9999;
+  animation: wipe 0.3s ease forwards;
+}
+
+/* ============================================================
+   FLASH CORRECT / WRONG
+   ============================================================ */
+.flash-correct {
+  animation: correctFlash 0.4s ease-out;
+}
+
+.flash-wrong {
+  animation: wrongShake 0.3s ease-out;
+}
+
+/* ============================================================
+   CONFETTI BURST
+   ============================================================ */
+.confetti-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  animation: confettiBurst 1.8s ease-out forwards;
+}
+
+/* ============================================================
+   PARTICLE FIELD
+   ============================================================ */
+.particle-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  bottom: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FF9900;
+  animation: floatUp var(--dur, 10s) var(--delay, 0s) linear infinite;
+}
+
+.particle:nth-child(3n)   { background: #FEBD69; }
+.particle:nth-child(3n+2) { background: rgba(255,153,0,0.6); }
+
+/* ============================================================
+   SUMMARY / RESULT ACTIONS / MISC LAYOUT HELPERS
+   ============================================================ */
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.summary-divider {
+  color: rgba(255,255,255,0.24);
+}
+
+/* ============================================================
+   HIDDEN UTILITY
+   ============================================================ */
+.hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.18); opacity: 0.8; }
+}
+
+@keyframes floatMap {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes pulsePin {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,153,0,0.3); }
+  70%       { box-shadow: 0 0 0 16px rgba(255,153,0,0); }
+}
+
+@keyframes regionFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ripple {
+  to { inset: -50%; transform: scale(1); opacity: 0; }
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: var(--op, 0.15); }
+  to   { transform: translateY(-100vh); opacity: 0; }
+}
+
+@keyframes correctFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(29,185,84,0.4); }
+  50%  { box-shadow: 0 0 0 8px rgba(29,185,84,0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(29,185,84,0); }
+}
+
+@keyframes wrongShake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes starPop {
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes confettiBurst {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx, 0px), var(--dy, -200px)) rotate(var(--rot, 180deg)); opacity: 0; }
+}
+
+@keyframes streakIn {
+  from { transform: translateY(-40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes streakOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateY(-40px); }
+}
+
+@keyframes wipe {
+  from { width: 0; opacity: 1; }
+  80%  { width: 100%; opacity: 1; }
+  to   { width: 100%; opacity: 0; }
+}
+
+@keyframes timerShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes timerWarning {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+@keyframes brandPulse {
+  0%, 100% { box-shadow: 2px 2px 0 #FF9900, 0 0 4px rgba(255,153,0,0.2); }
+  50%       { box-shadow: 4px 4px 0 #FF9900, 0 0 8px rgba(255,153,0,0.4); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes dotPing {
+  0%   { box-shadow: 0 0 0 0 rgba(255,153,0,0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(255,153,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,153,0,0); }
+}
+
+/* ============================================================
+   RESPONSIVE — 1024px
+   ============================================================ */
+@media (max-width: 1024px) {
+  .landing-shell,
+  .hub-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .atlas-stage,
+  .entry-panel {
+    padding: 28px;
+  }
+
+  .stage-copy h2 {
+    max-width: none;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — 860px
+   ============================================================ */
+@media (max-width: 860px) {
+  .atlas-stage {
+    padding: 24px;
+    border-bottom: 4px solid #FF9900;
+  }
+
+  .entry-panel,
+  .game-card,
+  .intro-panel,
+  .interstitial-panel,
+  .results-panel {
+    padding: 22px;
+  }
+
+  .score-preview,
+  .readiness-row,
+  .results-grid,
+  .bucket-grid,
+  .legend-grid,
+  .challenge-track,
+  .review-layout,
+  .sorter-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .answer-grid,
+  .region-options,
+  .leaderboard-row,
+  .result-status {
+    grid-template-columns: 1fr;
+  }
+
+  .game-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .atlas-preview {
+    min-height: 260px;
+  }
+}
+
+/* ============================================================
+   PREFERS REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

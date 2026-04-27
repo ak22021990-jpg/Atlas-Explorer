@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node \"C:/Users/anoop/OneDrive/Desktop/AMZ/tests/test-badges.js\")",
+      "Bash(npm test:*)",
+      "Bash(node tests/test-badges.js)"
+    ]
+  }
+}
