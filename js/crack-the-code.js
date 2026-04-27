@@ -35,8 +35,10 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   let streak = 0;
   let streakPeak = 0;
   let fallTimer = null;
+  let fallAnimationFrame = null;
   let startedAt = 0;
   let currentBlock = null;
+  let activeDropId = 0;
 
   container.innerHTML = `
     <section class="game-card arcade-card" style="display:flex;flex-direction:column;gap:16px;width:min(100%,760px);">
@@ -76,7 +78,17 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
     }
   });
 
+  function stopCurrentDrop() {
+    clearTimeout(fallTimer);
+    fallTimer = null;
+    if (fallAnimationFrame) {
+      cancelAnimationFrame(fallAnimationFrame);
+      fallAnimationFrame = null;
+    }
+  }
+
   function renderQuestion() {
+    stopCurrentDrop();
     input.value = '';
     input.disabled = false;
     input.focus();
@@ -104,13 +116,33 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
     ].join(';');
     fallingZone.appendChild(currentBlock);
 
-    requestAnimationFrame(() => {
-      void currentBlock.offsetHeight; // force reflow so transition sees the start state
-      currentBlock.style.transition = `top ${FALL_DURATION_MS}ms linear`;
-      currentBlock.style.top = 'calc(100% - 56px)';
-    });
-
     startedAt = Date.now();
+    activeDropId += 1;
+    const dropId = activeDropId;
+
+    const startTop = -56;
+    const endTop = Math.max(0, fallingZone.clientHeight - 56);
+    currentBlock.style.top = `${startTop}px`;
+
+    const animateDrop = () => {
+      if (dropId !== activeDropId || currentBlock === null) {
+        fallAnimationFrame = null;
+        return;
+      }
+
+      const elapsed = Date.now() - startedAt;
+      const progress = Math.min(1, elapsed / FALL_DURATION_MS);
+      const currentTop = startTop + ((endTop - startTop) * progress);
+      currentBlock.style.top = `${currentTop}px`;
+
+      if (progress < 1) {
+        fallAnimationFrame = requestAnimationFrame(animateDrop);
+      } else {
+        fallAnimationFrame = null;
+      }
+    };
+
+    fallAnimationFrame = requestAnimationFrame(animateDrop);
 
     fallTimer = setTimeout(() => {
       handleMiss();
@@ -123,7 +155,7 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
 
     const question = questions[currentIndex];
     if (checkAnswer(question.code, val)) {
-      clearTimeout(fallTimer);
+      stopCurrentDrop();
       correctCount += 1;
       streak += 1;
       if (streak > streakPeak) streakPeak = streak;
@@ -157,12 +189,11 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   }
 
   function handleMiss() {
-    clearTimeout(fallTimer);
+    stopCurrentDrop();
     streak = 0;
     const question = questions[currentIndex];
     if (currentBlock) {
-      currentBlock.style.transition = 'none';
-      currentBlock.style.top = 'calc(100% - 46px)';
+      currentBlock.style.top = `${Math.max(0, fallingZone.clientHeight - 46)}px`;
       currentBlock.style.color = 'var(--red)';
       currentBlock.textContent = `Missed ${question.code}`;
     }
