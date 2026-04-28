@@ -82,6 +82,7 @@ export async function mountPinIt(container, onComplete, options = {}) {
     startTimer();
     bindRegions(question);
     setRegionAnimationDelays(container);
+    addRegionLabels(container, 'rgba(255,255,255,0.55)');
   }
 
   function bindRegions(question) {
@@ -192,6 +193,7 @@ export async function mountPinReview(container, onDone) {
     document.head.appendChild(style);
   }
 
+  addRegionLabels(container, '#5A6B5C');
   const name = container.querySelector('#review-name');
   const meta = container.querySelector('#review-meta');
   container.querySelectorAll('.atlas-region').forEach((region) => {
@@ -227,6 +229,31 @@ function shuffle(items) {
     [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
   }
   return copy;
+}
+
+function addRegionLabels(container, color) {
+  const svgEl = container.querySelector('#atlas-map svg');
+  if (!svgEl) return;
+  container.querySelectorAll('.atlas-region').forEach((region) => {
+    const code = region.dataset.code;
+    if (!code) return;
+    const bbox = region.getBBox();
+    const cx = bbox.x + bbox.width / 2;
+    const cy = bbox.y + bbox.height / 2;
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', cx);
+    text.setAttribute('y', cy);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('font-size', '9');
+    text.setAttribute('font-family', 'Inter, sans-serif');
+    text.setAttribute('font-weight', '600');
+    text.setAttribute('fill', color);
+    text.setAttribute('pointer-events', 'none');
+    text.setAttribute('class', 'region-label');
+    text.textContent = code;
+    svgEl.appendChild(text);
+  });
 }
 
 function escapeHtml(value) {
