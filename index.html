@@ -13,7 +13,7 @@
         <div class="stage-copy">
           <span class="eyebrow">Geo Rush</span>
           <h2>Tap fast, stack streaks, and own the map.</h2>
-          <p>Four quick-hit geography levels built to feel more like a party run than a training quiz.</p>
+          <p>Three quick-hit geography levels built to feel more like a party run than a training quiz.</p>
         </div>
 
         <div class="atlas-preview" aria-hidden="true">
@@ -39,11 +39,6 @@
             <strong>City Stack</strong>
             <small>Drag city cards into the right zone for combo points</small>
           </li>
-          <li>
-            <span>04</span>
-            <strong>Zone Sprint</strong>
-            <small>Lock the right region before the timer burns out</small>
-          </li>
         </ol>
       </section>
 
@@ -64,9 +59,9 @@
         </div>
 
         <div class="readiness-row" aria-label="Training goals">
-          <span><strong>4</strong> levels</span>
+          <span><strong>3</strong> levels</span>
           <span><strong>70%</strong> to clear</span>
-          <span><strong>12</strong> stars max</span>
+          <span><strong>9</strong> stars max</span>
         </div>
 
         <div id="returning-badges" class="badge-trigger-row hidden">
@@ -99,7 +94,10 @@
           <label for="trainer-name">Name of the Trainer</label>
           <input id="trainer-name" name="trainer-name" type="text" minlength="2" autocomplete="off" required placeholder="Enter trainer name">
 
-          <button id="start-button" class="btn btn-primary btn-arcade" type="submit" disabled>Start the run</button>
+          <div class="form-actions">
+            <button id="start-button" class="btn btn-primary btn-arcade" type="submit" disabled>Start the run</button>
+            <button id="demo-button" class="btn btn-secondary btn-demo" type="button">Demo mode</button>
+          </div>
           <p id="form-message" class="form-message" role="status"></p>
         </form>
       </section>
@@ -108,7 +106,7 @@
     <script type="module">
       import { BADGE_DEFS } from './js/badges.js';
       import { renderBadgeShelf, badgeIconEmoji } from './js/results.js';
-      import { createSession, loadSession, saveSession } from './js/session.js';
+      import { createDemoSession, createSession, loadSession, saveSession } from './js/session.js';
       import { injectLandingParticles } from './js/ui-effects.js';
 
       const form = document.getElementById('start-form');
@@ -116,6 +114,7 @@
       const waveCodeInput = document.getElementById('wave-code');
       const trainerNameInput = document.getElementById('trainer-name');
       const startButton = document.getElementById('start-button');
+      const demoButton = document.getElementById('demo-button');
       const message = document.getElementById('form-message');
       const progressRingWrap = document.getElementById('progress-ring-wrap');
       const progressRingSvg = document.getElementById('progress-ring-svg');
@@ -148,6 +147,13 @@
         localStorage.setItem('atlas_agent', session.agent);
         window.location.href = 'game.html';
       });
+
+      demoButton.addEventListener('click', () => {
+        const session = createDemoSession();
+        saveSession(session);
+        localStorage.setItem('atlas_agent', session.agent);
+        window.location.href = 'game.html';
+      });
       validate();
 
       function hydrateReturningAgentUI() {
@@ -156,7 +162,7 @@
         if (!agent || !session) return;
 
         const passedGames = (session.games || []).filter((game) => game.passed).length;
-        const pct = passedGames / 4;
+        const pct = passedGames / 3;
         const circumference = 150.8;
         progressRingWrap.classList.add('has-progress');
         progressRingSvg.classList.remove('hidden');
@@ -201,4 +207,3 @@
     </script>
   </body>
 </html>
-

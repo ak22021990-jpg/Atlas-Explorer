@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#c48a3b",
+                        "primary-fixed": "#d7e3f7",
+                        "tertiary": "#271500",
+                        "surface-tint": "#535f70",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#432800",
+                        "on-primary-container": "#8a97a9",
+                        "inverse-surface": "#303031",
+                        "surface-bright": "#fbf9fa",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdcbd",
+                        "on-surface": "#1b1b1d",
+                        "surface-container-highest": "#e4e2e3",
+                        "surface-dim": "#dcd9db",
+                        "on-background": "#1b1b1d",
+                        "on-primary-fixed-variant": "#3c4858",
+                        "inverse-primary": "#bbc7db",
+                        "primary-container": "#232f3e",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9fa",
+                        "on-primary-fixed": "#101c2b",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-container": "#f0edee",
+                        "secondary-container": "#fe9800",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#693c00",
+                        "surface": "#fbf9fa",
+                        "tertiary-fixed": "#ffddb7",
+                        "outline-variant": "#c5c6cc",
+                        "on-surface-variant": "#44474c",
+                        "on-secondary-fixed": "#2c1600",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "secondary-fixed-dim": "#ffb86f",
+                        "on-secondary-container": "#643900",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#eae7e9",
+                        "tertiary-fixed-dim": "#fbba67",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f3f0f1",
+                        "primary-fixed-dim": "#bbc7db",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e4e2e3",
+                        "outline": "#75777c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary": "#0e1a28",
+                        "secondary": "#8a5100"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "48px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2-headline": ["Inter"],
+                        "h3-subheading": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1-display": ["Inter"],
+                        "label-numeric": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "h2-headline": ["32px", { "lineHeight": "1.2", "fontWeight": "800" }],
+                        "h3-subheading": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1-display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-numeric": ["14px", { "lineHeight": "1", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #232F3E; color: #ffffff; }
+        .bg-topographic {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c20 0 40 20 60 20s40-20 60-20 40 20 60 20 40-20 60-20v80c-20 0-40 20-60 20s-40-20-60-20-40 20-60 20-40-20-60-20V10z' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: cover;
+        }
+    </style>
+</head>
+<body class="font-body-md min-h-screen flex flex-col antialiased bg-primary-container text-on-primary">
+<!-- TopAppBar -->
+<header class="bg-slate-900 dark:bg-black font-inter tracking-tight uppercase font-semibold docked full-width top-0 border-b border-white/10 shadow-sm flex justify-between items-center px-6 py-3 w-full z-50 sticky">
+<div class="flex items-center gap-4">
+<span class="text-lg font-black tracking-widest text-white">Atlas Explorer</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-400 hover:text-amber-300 transition-colors" href="#">Map</a>
+<a class="text-slate-400 hover:text-amber-300 transition-colors" href="#">Archive</a>
+<a class="text-slate-400 hover:text-amber-300 transition-colors" href="#">Rankings</a>
+<a class="text-amber-500 border-b-2 border-amber-500 hover:text-amber-300 transition-colors py-1" href="#">Profile</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="text-amber-500 dark:text-amber-400 text-sm hidden md:inline-block">Stats: 1,250</span>
+<button class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</button>
+<button class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">military_tech</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col md:flex-row w-full max-w-container-max mx-auto relative bg-topographic">
+<!-- Left Panel: Form & Info (Asymmetrical Layout) -->
+<section class="w-full md:w-5/12 lg:w-1/3 p-margin flex flex-col justify-center bg-slate-900/80 backdrop-blur-sm border-r border-white/10 z-10 relative">
+<div class="mb-gutter">
+<h1 class="font-h1-display text-on-primary mb-unit">Atlas Explorer</h1>
+<p class="font-body-lg text-on-primary-container">A high-speed geographic challenge run across North America.</p>
+</div>
+<!-- Readiness Row -->
+<div class="flex items-center justify-between gap-4 mb-gutter py-4 border-y border-white/10 bg-black/20 rounded-lg px-4">
+<div class="flex flex-col items-center">
+<span class="font-h3-subheading text-secondary-container">4</span>
+<span class="font-label-caps text-on-primary-container text-[10px]">Levels</span>
+</div>
+<div class="w-px h-8 bg-white/10"></div>
+<div class="flex flex-col items-center">
+<span class="font-h3-subheading text-secondary-container">70%</span>
+<span class="font-label-caps text-on-primary-container text-[10px]">To Clear</span>
+</div>
+<div class="w-px h-8 bg-white/10"></div>
+<div class="flex flex-col items-center">
+<span class="font-h3-subheading text-secondary-container">12</span>
+<span class="font-label-caps text-on-primary-container text-[10px]">Stars Max</span>
+</div>
+</div>
+<!-- Form -->
+<form class="flex flex-col gap-6">
+<div class="relative">
+<input class="block w-full bg-transparent border-0 border-b border-outline-variant focus:border-secondary-container focus:ring-0 px-0 py-2 font-body-md text-on-primary placeholder-transparent peer transition-colors" id="playerTag" placeholder="Player Tag" required="" type="text"/>
+<label class="absolute left-0 -top-3.5 text-on-primary-container font-label-caps text-[10px] transition-all peer-placeholder-shown:text-body-md peer-placeholder-shown:top-2 peer-placeholder-shown:font-body-md peer-focus:-top-3.5 peer-focus:text-[10px] peer-focus:font-label-caps peer-focus:text-secondary-container" for="playerTag">Player Tag</label>
+</div>
+<div class="relative">
+<input class="block w-full bg-transparent border-0 border-b border-outline-variant focus:border-secondary-container focus:ring-0 px-0 py-2 font-body-md text-on-primary placeholder-transparent peer transition-colors" id="waveCode" placeholder="iCube Wave Code" required="" type="text"/>
+<label class="absolute left-0 -top-3.5 text-on-primary-container font-label-caps text-[10px] transition-all peer-placeholder-shown:text-body-md peer-placeholder-shown:top-2 peer-placeholder-shown:font-body-md peer-focus:-top-3.5 peer-focus:text-[10px] peer-focus:font-label-caps peer-focus:text-secondary-container" for="waveCode">iCube Wave Code</label>
+</div>
+<div class="relative">
+<input class="block w-full bg-transparent border-0 border-b border-outline-variant focus:border-secondary-container focus:ring-0 px-0 py-2 font-body-md text-on-primary placeholder-transparent peer transition-colors" id="trainerName" placeholder="Name of the Trainer" required="" type="text"/>
+<label class="absolute left-0 -top-3.5 text-on-primary-container font-label-caps text-[10px] transition-all peer-placeholder-shown:text-body-md peer-placeholder-shown:top-2 peer-placeholder-shown:font-body-md peer-focus:-top-3.5 peer-focus:text-[10px] peer-focus:font-label-caps peer-focus:text-secondary-container" for="trainerName">Name of the Trainer</label>
+</div>
+<button class="mt-4 bg-secondary-container text-on-secondary font-h3-subheading text-[20px] py-4 rounded-lg hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(254,152,0,0.3)] transition-all duration-200 uppercase tracking-wide" type="button">
+                    Start the run
+                </button>
+</form>
+</section>
+<!-- Right Panel: Bento Grid Preview (Asymmetrical Layout) -->
+<section class="w-full md:w-7/12 lg:w-2/3 p-margin relative min-h-[500px] flex items-center justify-center">
+<!-- Map Background Image -->
+<div class="absolute inset-0 z-0 opacity-40">
+<img alt="dark abstract topographic map visualization with glowing data points" class="w-full h-full object-cover mix-blend-overlay" data-alt="dark abstract topographic map visualization with glowing data points" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe53m-zicxQkIhXHQx4afA_Asg1A3qQDf-AK-wKHZcHdLhh3YKJK_KwaxG40O3i4EYxFau1l4I1icrcAypZam4AHEvEryDHMWPrDu2Fdd6ZzzOPraHLJ4-QDktGh51MzSuj4CsU4gbov_nt1IbRahYDKXsQQEtGaMgJ6ipI4-3RL3HCreuqmAuHt5QHfgF-4kKFth6Jc8hX7XV-YGeVDUk-yiKgLs7bV7vD9KXomkLI_QnAg7qvNpC0uztIrQbsEIikWyUSFtafJH_"/>
+<div class="absolute inset-0 bg-gradient-to-r from-primary-container to-transparent"></div>
+</div>
+<!-- Bento Grid -->
+<div class="grid grid-cols-2 gap-4 w-full max-w-2xl z-10 relative">
+<!-- Tile 1 -->
+<div class="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between hover:bg-black/60 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary-container text-3xl group-hover:scale-110 transition-transform">pin_drop</span>
+<span class="font-label-caps text-on-primary-container text-[10px] border border-white/20 px-2 py-1 rounded">01</span>
+</div>
+<div>
+<h3 class="font-h3-subheading text-on-primary mb-1">Code Drop</h3>
+<p class="font-label-numeric text-on-primary-container text-xs">Precision deployment</p>
+</div>
+</div>
+<!-- Tile 2 -->
+<div class="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between hover:bg-black/60 transition-colors cursor-pointer group transform md:translate-y-8">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary-container text-3xl group-hover:scale-110 transition-transform">speed</span>
+<span class="font-label-caps text-on-primary-container text-[10px] border border-white/20 px-2 py-1 rounded">02</span>
+</div>
+<div>
+<h3 class="font-h3-subheading text-on-primary mb-1">Pin Rush</h3>
+<p class="font-label-numeric text-on-primary-container text-xs">Time-attack navigation</p>
+</div>
+</div>
+<!-- Tile 3 -->
+<div class="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between hover:bg-black/60 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary-container text-3xl group-hover:scale-110 transition-transform">layers</span>
+<span class="font-label-caps text-on-primary-container text-[10px] border border-white/20 px-2 py-1 rounded">03</span>
+</div>
+<div>
+<h3 class="font-h3-subheading text-on-primary mb-1">City Stack</h3>
+<p class="font-label-numeric text-on-primary-container text-xs">Vertical urban challenge</p>
+</div>
+</div>
+<!-- Tile 4 -->
+<div class="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between hover:bg-black/60 transition-colors cursor-pointer group transform md:translate-y-8">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary-container text-3xl group-hover:scale-110 transition-transform">route</span>
+<span class="font-label-caps text-on-primary-container text-[10px] border border-white/20 px-2 py-1 rounded">04</span>
+</div>
+<div>
+<h3 class="font-h3-subheading text-on-primary mb-1">Zone Sprint</h3>
+<p class="font-label-numeric text-on-primary-container text-xs">Sector clearance</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-slate-900 dark:bg-black font-inter text-[10px] font-bold uppercase docked full-width bottom-0 rounded-t-lg border-t border-white/10 shadow-lg fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">map</span>
+<span>Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span>Archive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">leaderboard</span>
+<span>Rankings</span>
+</a>
+<a class="flex flex-col items-center justify-center text-orange-500 bg-white/5 rounded-lg p-2 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1 text-orange-500">person</span>
+<span>Profile</span>
+</a>
+</nav>
+</body></html>

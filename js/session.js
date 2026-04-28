@@ -5,13 +5,13 @@ export const STORAGE_KEY = 'atlas-explorer-session';
 export const GAME_DEFINITIONS = [
   { key: 'crack', label: 'Crack the Code', maxScore: 260 },
   { key: 'pin', label: 'Pin It!', maxScore: 195 },
-  { key: 'sorter', label: 'City Sorter', maxScore: 312 },
-  { key: 'ranger', label: 'Region Ranger', maxScore: 260 }
+  { key: 'sorter', label: 'City Sorter', maxScore: 312 }
 ];
 
 export function createSession(name, waveCode, trainerName) {
   return {
     id: `atlas-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    mode: 'player',
     agent: name,
     name,
     waveCode,
@@ -37,6 +37,14 @@ export function createSession(name, waveCode, trainerName) {
       earnedBadges: []
     }))
   };
+}
+
+export function createDemoSession() {
+  const session = createSession('Manager Demo', 'DEMO', 'Demo Mode');
+  session.mode = 'demo';
+  session.demo = true;
+  session.id = `atlas-demo-${Date.now()}`;
+  return session;
 }
 
 export function recordGameAttempt(session, gameIndexOrKey, rawAttempt) {
@@ -109,7 +117,7 @@ export function getSubmissionPayload(session) {
     game1: session.games[0]?.score || 0,
     game2: session.games[1]?.score || 0,
     game3: session.games[2]?.score || 0,
-    game4: session.games[3]?.score || 0,
+    game4: 0,
     total: getTotalScore(session),
     stars: getTotalStars(session),
     passFail: isAllPassed(session) ? 'Pass' : 'Fail',
@@ -125,17 +133,28 @@ export function loadSession(storage = globalThis.localStorage) {
   const raw = storage.getItem(STORAGE_KEY);
   if (!raw) return null;
   const session = JSON.parse(raw);
+  session.mode = session.mode || (session.demo ? 'demo' : 'player');
+  session.demo = session.mode === 'demo' || Boolean(session.demo);
   if (!session.agent && session.name) session.agent = session.name;
   session.earnedBadges = Array.isArray(session.earnedBadges) ? session.earnedBadges : [];
   session.lastKnownRank = Number.isFinite(session.lastKnownRank) ? session.lastKnownRank : null;
-  session.games = (session.games || []).map((game) => ({
-    streakPeak: 0,
-    attemptNumber: Array.isArray(game.attempts) ? game.attempts.length : 0,
-    earnedBadges: [],
-    ...game,
-    earnedBadges: Array.isArray(game.earnedBadges) ? game.earnedBadges : [],
-    attempts: Array.isArray(game.attempts) ? game.attempts : []
-  }));
+  const legacyGames = session.games || [];
+  session.games = GAME_DEFINITIONS.map((definition, index) => {
+    const game = legacyGames.find((candidate) => candidate?.key === definition.key) || legacyGames[index] || {};
+    const attempts = Array.isArray(game.attempts) ? game.attempts : [];
+    return {
+      streakPeak: 0,
+      attemptNumber: attempts.length,
+      earnedBadges: [],
+      ...game,
+      key: definition.key,
+      label: definition.label,
+      earnedBadges: Array.isArray(game.earnedBadges) ? game.earnedBadges : [],
+      attempts
+    };
+  });
+  session.currentGameIndex = Math.min(session.currentGameIndex || 0, session.games.length);
+  session.completed = Boolean(session.completed || session.currentGameIndex >= session.games.length);
   return session;
 }
 

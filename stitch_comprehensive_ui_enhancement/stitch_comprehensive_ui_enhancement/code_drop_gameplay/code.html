@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer - Code Drop Gameplay</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#c48a3b",
+                        "primary-fixed": "#d7e3f7",
+                        "tertiary": "#271500",
+                        "surface-tint": "#535f70",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#432800",
+                        "on-primary-container": "#8a97a9",
+                        "inverse-surface": "#303031",
+                        "surface-bright": "#fbf9fa",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdcbd",
+                        "on-surface": "#1b1b1d",
+                        "surface-container-highest": "#e4e2e3",
+                        "surface-dim": "#dcd9db",
+                        "on-background": "#1b1b1d",
+                        "on-primary-fixed-variant": "#3c4858",
+                        "inverse-primary": "#bbc7db",
+                        "primary-container": "#232f3e",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9fa",
+                        "on-primary-fixed": "#101c2b",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-container": "#f0edee",
+                        "secondary-container": "#fe9800",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#693c00",
+                        "surface": "#fbf9fa",
+                        "tertiary-fixed": "#ffddb7",
+                        "outline-variant": "#c5c6cc",
+                        "on-surface-variant": "#44474c",
+                        "on-secondary-fixed": "#2c1600",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "secondary-fixed-dim": "#ffb86f",
+                        "on-secondary-container": "#643900",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#eae7e9",
+                        "tertiary-fixed-dim": "#fbba67",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f3f0f1",
+                        "primary-fixed-dim": "#bbc7db",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e4e2e3",
+                        "outline": "#75777c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary": "#0e1a28",
+                        "secondary": "#8a5100"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "48px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2-headline": ["Inter"],
+                        "h3-subheading": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1-display": ["Inter"],
+                        "label-numeric": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "h2-headline": ["32px", { "lineHeight": "1.2", "fontWeight": "800" }],
+                        "h3-subheading": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1-display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-numeric": ["14px", { "lineHeight": "1", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0e1a28;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 50% 50%, rgba(74, 124, 111, 0.05) 0%, transparent 60%);
+        }
+        .terrain-border {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ripple-bg {
+            background: linear-gradient(180deg, rgba(74, 124, 111, 0.1) 0%, transparent 100%);
+        }
+        .input-ghost {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #4A7C6F;
+            outline: none;
+        }
+        .input-ghost:focus {
+            border-bottom-color: #ff9900;
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-8 px-4 md:px-margin">
+<!-- Top Navigation / Header Panel -->
+<div class="w-full max-w-container-max flex justify-between items-center mb-8 terrain-border bg-slate-900/50 backdrop-blur-md rounded-lg p-4 shadow-sm">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-amber-500 text-3xl" style="font-variation-settings: 'FILL' 1;">explore</span>
+<div>
+<h1 class="font-h3-subheading text-h3-subheading text-on-primary">Atlas Explorer</h1>
+<p class="font-label-caps text-label-caps text-on-primary-container mt-1">Code Drop Sector</p>
+</div>
+</div>
+<div class="flex gap-6 items-center">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-primary-container">Score</span>
+<span class="font-h2-headline text-h2-headline text-amber-500">2,450</span>
+</div>
+<div class="h-10 w-px bg-white/10 hidden md:block"></div>
+<div class="flex flex-col items-end hidden md:flex">
+<span class="font-label-caps text-label-caps text-on-primary-container">Streak</span>
+<div class="flex items-center gap-1 text-[#4A7C6F]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-numeric text-label-numeric">12x</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-on-primary">pause</span>
+</button>
+</div>
+</div>
+<!-- Main Gameplay Area -->
+<main class="w-full max-w-4xl flex-grow flex flex-col items-center justify-center relative pb-20">
+<!-- Ripple Background Container -->
+<div class="absolute inset-0 ripple-bg rounded-xl terrain-border overflow-hidden opacity-50 pointer-events-none flex flex-col items-center pt-20">
+<!-- Simulated Ripple Lines -->
+<div class="w-[120%] h-[120%] rounded-full border border-[#4A7C6F]/20 absolute top-[-50%] scale-[1.5]"></div>
+<div class="w-[100%] h-[100%] rounded-full border border-[#4A7C6F]/30 absolute top-[-30%] scale-[1.2]"></div>
+<div class="w-[80%] h-[80%] rounded-full border border-[#4A7C6F]/40 absolute top-[-10%] scale-[1]"></div>
+</div>
+<!-- Progress Indicator -->
+<div class="absolute top-8 w-full flex justify-center z-10">
+<div class="bg-[#4A7C6F]/20 backdrop-blur-sm terrain-border px-4 py-2 rounded-full flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-[#4A7C6F]">Level 4: Coastal Regions</span>
+<div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="w-[65%] h-full bg-[#4A7C6F] rounded-full"></div>
+</div>
+<span class="font-label-numeric text-label-numeric text-on-primary">65%</span>
+</div>
+</div>
+<!-- Falling Prompts Area -->
+<div class="w-full h-64 relative flex items-center justify-center z-10 mb-12">
+<!-- Active Target -->
+<div class="bg-surface-bright/5 backdrop-blur-md px-8 py-4 rounded-lg terrain-border shadow-[0_4px_24px_rgba(74,124,111,0.2)] transform translate-y-8">
+<h2 class="font-h1-display text-h1-display text-on-primary tracking-tight">California</h2>
+<div class="absolute -top-3 -right-3 w-6 h-6 bg-[#4A7C6F] rounded-full flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-[14px] text-white">water_drop</span>
+</div>
+</div>
+<!-- Incoming Targets (Decorative, simulated background) -->
+<div class="absolute top-0 right-[20%] opacity-40 blur-[1px] transform scale-90">
+<span class="font-h3-subheading text-h3-subheading text-on-primary-container">Ontario</span>
+</div>
+<div class="absolute top-10 left-[15%] opacity-20 blur-[2px] transform scale-75">
+<span class="font-h3-subheading text-h3-subheading text-on-primary-container">British Columbia</span>
+</div>
+</div>
+<!-- Input Area -->
+<div class="w-full max-w-sm flex flex-col items-center z-10">
+<div class="relative w-full flex justify-center mb-6">
+<input autofocus="" class="input-ghost text-center font-h1-display text-h1-display text-amber-500 w-48 pb-2 tracking-[0.5em] uppercase placeholder-white/10" maxlength="2" placeholder="CA" type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 rounded-lg bg-surface-bright/5 terrain-border font-label-caps text-label-caps text-on-primary hover:bg-white/10 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">lightbulb</span> Hint (3)
+                </button>
+<button class="px-8 py-3 rounded-lg bg-[#FF9900] font-label-caps text-label-caps text-[#271500] hover:bg-[#FF9900]/90 transition-transform active:translate-y-0.5 shadow-[0_2px_4px_rgba(45,59,47,0.3)]">
+                    SUBMIT
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom HUD Data -->
+<div class="w-full max-w-container-max flex justify-between items-end pb-8 opacity-60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">my_location</span>
+<span class="font-label-numeric text-label-numeric font-mono">LAT: 36.7783 N, LON: 119.4179 W</span>
+</div>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-[#4A7C6F]"></div>
+<div class="w-2 h-2 rounded-full bg-[#4A7C6F]"></div>
+<div class="w-2 h-2 rounded-full bg-white/20"></div>
+</div>
+</div>
+</body></html>

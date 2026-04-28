@@ -1,6 +1,7 @@
 import { suite, test, assert, assertEqual, assertDeepEqual, summary } from './test-runner.js';
 import {
   createSession,
+  createDemoSession,
   loadSession,
   getSubmissionPayload,
   getTotalScore,
@@ -13,9 +14,9 @@ import {
 
 suite('session');
 
-test('creates four game slots', () => {
+test('creates three game slots', () => {
   const session = createSession('Priya', 'APR-2026-01');
-  assertEqual(session.games.length, 4);
+  assertEqual(session.games.length, 3);
   assertEqual(session.currentGameIndex, 0);
 });
 
@@ -66,11 +67,10 @@ test('submission payload totals scores and flags', () => {
   recordGameAttempt(session, 0, { score: 160, correctCount: 16, totalCount: 20 });
   recordGameAttempt(session, 1, { score: 143, correctCount: 11, totalCount: 15 });
   recordGameAttempt(session, 2, { score: 221, correctCount: 17, totalCount: 24 });
-  recordGameAttempt(session, 3, { score: 182, correctCount: 14, totalCount: 20 });
   const payload = getSubmissionPayload(session);
   assert(isAllPassed(session));
-  assertEqual(getTotalScore(session), 706);
-  assertEqual(getTotalStars(session), 5);
+  assertEqual(getTotalScore(session), 524);
+  assertEqual(getTotalStars(session), 4);
   assertEqual(payload.passFail, 'Pass');
   assertEqual(payload.flagged, 'No');
 });
@@ -79,6 +79,16 @@ test('createSession initialises earnedBadges and lastKnownRank', () => {
   const session = createSession('Priya', 'APR-2026-01');
   assertDeepEqual(session.earnedBadges, []);
   assertEqual(session.lastKnownRank, null);
+  assertEqual(session.mode, 'player');
+});
+
+test('createDemoSession marks session as demo without progress', () => {
+  const session = createDemoSession();
+  assertEqual(session.mode, 'demo');
+  assertEqual(session.demo, true);
+  assertEqual(session.agent, 'Manager Demo');
+  assertEqual(session.currentGameIndex, 0);
+  assert(session.games.every((game) => !game.passed && game.attempts.length === 0));
 });
 
 test('each game slot initialises streakPeak to 0', () => {
@@ -112,6 +122,43 @@ test('loadSession hydrates earned badges and rank defaults', () => {
   assertDeepEqual(session.earnedBadges, []);
   assertEqual(session.lastKnownRank, null);
   assertEqual(session.games[0].attemptNumber, 0);
+  assertEqual(session.mode, 'player');
+});
+
+test('loadSession preserves legacy demo flag', () => {
+  const storage = {
+    getItem() {
+      return JSON.stringify({
+        agent: 'Manager Demo',
+        demo: true,
+        games: [{ attempts: [] }]
+      });
+    }
+  };
+  const session = loadSession(storage);
+  assertEqual(session.mode, 'demo');
+  assertEqual(session.demo, true);
+});
+
+test('loadSession removes retired region ranger slot', () => {
+  const storage = {
+    getItem() {
+      return JSON.stringify({
+        agent: 'Priya',
+        currentGameIndex: 4,
+        games: [
+          { key: 'crack', attempts: [] },
+          { key: 'pin', attempts: [] },
+          { key: 'sorter', attempts: [] },
+          { key: 'ranger', attempts: [] }
+        ]
+      });
+    }
+  };
+  const session = loadSession(storage);
+  assertEqual(session.games.length, 3);
+  assertEqual(session.games.some((game) => game.key === 'ranger'), false);
+  assertEqual(session.currentGameIndex, 3);
 });
 
 summary();

@@ -1,63 +1,224 @@
 # Atlas Explorer
 
-A vanilla JavaScript geography training game for recruitment screening agents. It covers US states and Canadian provinces through four mini-games and can submit scores to Google Sheets through Google Apps Script.
+Atlas Explorer is a browser-based geography arcade game built around three mini-games that test location knowledge across the US and Canada. It is designed as a lightweight training and score-tracking experience with a fast, replayable flow instead of a heavy LMS-style interface.
 
-The app intentionally stays plain HTML, CSS, and ES-module JavaScript. There is no React, Vite, build step, or generated framework shell, which keeps the interface easy to customize and deploy on GitHub Pages.
+Players start from a landing page, enter their name, wave code, and trainer name, then move through three levels in sequence. Each level has its own interaction style, scoring logic, and pass condition, while the app tracks stars, badges, streaks, retries, and leaderboard progress.
 
-## Run Locally
+## What the Game Is About
 
-This app uses ES modules and fetches local JSON/SVG files, so run it from a local web server:
+The project turns geography knowledge into a short challenge run:
+
+- Learn or test US states and Canadian provinces.
+- Clear three game modes with at least 70% accuracy in each.
+- Earn up to 3 stars per level.
+- Unlock badges for performance milestones like perfect rounds, streaks, and full clears.
+- Save progress locally, with optional leaderboard and badge sync through Google Apps Script.
+
+This is currently a static front-end app, so it is easy to host on GitHub Pages or any simple web server.
+
+## The Three Games
+
+### 1. Code Drop
+
+Implemented in `js/crack-the-code.js`.
+
+The player sees a state or province name falling down the screen and must type its 2-letter code before it reaches the bottom.
+
+- 20 total questions
+- Focuses partly on commonly used locations first
+- Rewards speed with bonus points
+- Builds streaks for consecutive correct answers
+
+This mode is about quick recall of location abbreviations like `TX`, `CA`, or `ON`.
+
+### 2. Pin Rush
+
+Implemented in `js/pin-it.js`.
+
+The player is shown a live map of North America and must click the correct state or province for the target prompt.
+
+- 15 total map questions
+- Uses the SVG map in `maps/north-america.svg`
+- Each round is timed
+- Correct and incorrect regions are highlighted visually
+- Includes a post-round map review mode
+
+This mode is the direct map-recognition challenge.
+
+### 3. City Stack
+
+Implemented in `js/city-sorter.js`.
+
+The player drags city cards into the correct state or province buckets.
+
+- 4 rounds
+- 3 buckets per round
+- 2 cities per bucket
+- Drag-and-drop interaction
+- Speed bonus for fast clears
+
+This mode tests whether players can connect major cities to their correct regions.
+
+## Game Flow
+
+Main flow is handled in `js/main.js`.
+
+1. The player starts on `index.html`.
+2. A session is created and stored in localStorage.
+3. The player progresses through the three mini-games in `game.html`.
+4. After each level, the app shows a pass or retry interstitial.
+5. At the end, the app shows results, stars, badges, and leaderboard status.
+
+Current behavior in the code:
+
+- Passing threshold is `70%`
+- Failed levels can be retried
+- Demo mode starts a local manager walkthrough and lets viewers jump to any level without signing up or clearing previous levels
+- Score, stars, streak peaks, and attempts are stored in session data
+- Final results combine all three games into one run summary
+
+## Scoring, Stars, and Badges
+
+### Scoring
+
+Implemented in `js/scoring.js`.
+
+- Base points are awarded for correct answers
+- Some games add speed bonus points
+- Passing requires at least `70%` correct
+
+### Stars
+
+- 1 star for a passing round
+- 2 stars for `80%+`
+- 3 stars for `95%+`
+
+Maximum possible total is `9` stars across all three games.
+
+### Badges
+
+Implemented in `js/badges.js`.
+
+Current badge set includes:
+
+- `First Blood`
+- `Perfect Agent`
+- `Hot Streak`
+- `Globe Trotter`
+- `Diamond Agent`
+- `Star Collector`
+- `Never Quit`
+- `Speed Run`
+
+## Tech Stack
+
+Atlas Explorer is intentionally simple and mostly framework-free.
+
+- `HTML5` for page structure
+- `CSS3` for layout, theme, animations, and game visuals
+- `Vanilla JavaScript (ES Modules)` for gameplay logic
+- `JSON` files for state, city, and batch data
+- `SVG` for the interactive North America map
+- `localStorage` for local session persistence
+- `Google Apps Script + Google Sheets` as the optional remote backend
+- `Node.js` for running tests
+
+## Project Structure
+
+```text
+AMZ/
+|- index.html              # Landing page
+|- game.html               # Main gameplay shell
+|- css/
+|  |- styles.css
+|  |- geo.css
+|  |- retro.css
+|- js/
+|  |- main.js
+|  |- session.js
+|  |- scoring.js
+|  |- crack-the-code.js
+|  |- pin-it.js
+|  |- city-sorter.js
+|  |- results.js
+|  |- badges.js
+|  |- leaderboard.js
+|  |- flow-ui.js
+|  |- ui-effects.js
+|- data/
+|  |- states.json
+|  |- cities.json
+|  |- batches.json
+|- maps/
+|  |- north-america.svg
+|- apps-script/
+|  |- Code.gs
+|- tests/
+|  |- test-*.js
+```
+
+## Data Files
+
+- `data/states.json`: states and provinces, codes, and region groupings
+- `data/cities.json`: city-to-state/province mapping for City Stack
+- `data/batches.json`: available batch or wave options
+- `maps/north-america.svg`: interactive map used by Pin Rush and map review
+
+## Running Locally
+
+Because the app uses ES modules and fetches local JSON/SVG assets, run it through a local server instead of opening the HTML files directly.
 
 ```powershell
 python -m http.server 8000
 ```
 
-Then open `http://localhost:8000`.
+Then open:
 
-## Mini-Games
+```text
+http://localhost:8000
+```
 
-1. **Crack the Code**: match abbreviation codes to full state/province names.
-2. **Pin It!**: click the requested region on the atlas map.
-3. **City Sorter**: drag city cards into the correct state/province buckets.
-4. **Region Ranger**: classify states and provinces into broad geographic regions.
+## Testing
 
-Agents must pass each mini-game at 70% or higher. One retry is allowed per mini-game. A second failure blocks progression and flags the session for trainer review.
-
-## Tests
+Run the automated tests with:
 
 ```powershell
 npm.cmd test
 ```
 
-PowerShell may block `npm test` on some Windows systems because it resolves to `npm.ps1`; `npm.cmd test` avoids that policy issue.
+The test suite covers scoring, sessions, results, leaderboard behavior, badges, flow UI helpers, and the individual game modules.
 
-## Google Sheets Backend
+## Optional Google Sheets Backend
 
-1. Create a Google Sheet named `Atlas Explorer Scores`.
+The app works without a backend. If no Apps Script URL is configured, scores are stored locally in the browser.
+
+To enable remote leaderboard and badge sync:
+
+1. Create a Google Sheet for score storage.
 2. Open Extensions > Apps Script.
-3. Paste the contents of `apps-script/Code.gs`.
-4. Replace `REPLACE_WITH_YOUR_SPREADSHEET_ID` with the sheet ID from the Sheet URL.
-5. Deploy as a Web App with:
-   - Execute as: Me
-   - Who has access: Anyone
-6. Copy the deployed Web App URL.
-7. In `js/leaderboard.js`, replace `REPLACE_WITH_YOUR_APPS_SCRIPT_URL` with that URL.
+3. Paste in `apps-script/Code.gs`.
+4. Add your spreadsheet ID where required.
+5. Deploy the script as a Web App.
+6. Copy the deployed `/exec` URL.
+7. Paste that URL into `js/leaderboard.js` as `APPS_SCRIPT_URL`.
 
-Until the Apps Script URL is configured, scores are stored in browser localStorage so the game remains usable for local demos.
+## Deployment
 
-## Batch IDs
+Because this is a static app, it can be deployed easily to:
 
-Batch choices live in `data/batches.json`. Add upcoming cohort IDs there before training starts so agents choose from a controlled list.
+- GitHub Pages
+- Netlify
+- Vercel static hosting
+- Any basic web server
 
-## GitHub Pages
+For GitHub Pages, serve the repository root and keep the current folder structure intact.
 
-The app is static and can be served from the repository root:
+## Summary
 
-1. Push the repository to GitHub.
-2. In repository Settings > Pages, choose Deploy from branch.
-3. Select the `main` branch and `/ (root)` folder.
-4. Use the Pages URL for training sessions.
+Atlas Explorer is a vanilla JavaScript geography arcade app with three distinct game modes:
 
-## Assets
+- type the right location code
+- click the correct place on the map
+- sort cities into their home region
 
-The current build includes a stylized SVG atlas at `maps/north-america.svg`.
+It combines simple static-site deployment with game-style progression, scoring, badges, and optional Google Sheets reporting.

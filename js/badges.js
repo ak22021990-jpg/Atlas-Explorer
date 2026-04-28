@@ -46,16 +46,16 @@ export function evaluateBadges(gameIndex, result, session, ratioOverride) {
   // hot-streak: peak consecutive-correct run >= 3 for this game
   if (game.streakPeak >= 3) maybeAdd('hot-streak');
 
-  // globe-trotter: all games passed
-  if (allGames.length === 4 && allGames.every(g => g.passed)) maybeAdd('globe-trotter');
+  // globe-trotter: all active games passed
+  if (allGames.length > 0 && allGames.every(g => g.passed)) maybeAdd('globe-trotter');
 
-  // diamond-agent: all games passed on first attempt each
-  if (allGames.length === 4 && allGames.every(g => g.passed && g.attempts.length === 1))
+  // diamond-agent: all active games passed on first attempt each
+  if (allGames.length > 0 && allGames.every(g => g.passed && g.attempts.length === 1))
     maybeAdd('diamond-agent');
 
-  // star-collector: 12 total stars (max possible in a session)
+  // star-collector: max possible stars in a session
   const totalStars = allGames.reduce((sum, g) => sum + (g.stars || 0), 0);
-  if (totalStars >= 12) maybeAdd('star-collector');
+  if (allGames.length > 0 && totalStars >= allGames.length * 3) maybeAdd('star-collector');
 
   // never-quit: passed on 4th or later attempt (3+ prior fails)
   if (game.attempts.length >= 4) maybeAdd('never-quit');

@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#0e1a28",
+        "primary-container": "#232f3e",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#8a97a9",
+        "secondary": "#8a5100",
+        "secondary-container": "#fe9800",
+        "on-secondary": "#ffffff",
+        "on-secondary-container": "#643900",
+        "tertiary": "#271500",
+        "tertiary-container": "#432800",
+        "on-tertiary": "#ffffff",
+        "on-tertiary-container": "#c48a3b",
+        "surface": "#fbf9fa",
+        "surface-tint": "#535f70",
+        "surface-container": "#f0edee",
+        "surface-container-high": "#eae7e9",
+        "surface-container-highest": "#e4e2e3",
+        "on-surface": "#1b1b1d",
+        "on-surface-variant": "#44474c",
+        "outline": "#75777c",
+        "outline-variant": "#c5c6cc",
+        "inverse-surface": "#303031",
+        "inverse-on-surface": "#f3f0f1",
+        "inverse-primary": "#bbc7db",
+        "error": "#ba1a1a",
+        "on-error": "#ffffff",
+        "primary-fixed": "#d7e3f7",
+        "primary-fixed-dim": "#bbc7db",
+        "secondary-fixed": "#ffdcbd",
+        "secondary-fixed-dim": "#ffb86f",
+        "surface-dim": "#dcd9db",
+        "surface-bright": "#fbf9fa",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f5f3f4"
+      },
+      fontFamily: { sans: ["Inter", "sans-serif"] },
+      spacing: {
+        "margin": "48px",
+        "container-max": "1440px",
+        "gutter": "24px",
+        "unit": "4px"
+      }
+    }
+  }
+}
+</script>
+<style>
+  /* ── Base ── */
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: "Inter", sans-serif; background-color: #0e1a28; color: #ffffff; margin: 0; }
+
+  /* ── Topographic overlay - site-wide ── */
+  .topo-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 30px,
+        rgba(83,95,112,0.04) 30px,
+        rgba(83,95,112,0.04) 31px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 50px,
+        rgba(83,95,112,0.03) 50px,
+        rgba(83,95,112,0.03) 51px
+      );
+  }
+
+  /* ── Paper card style ── */
+  .paper-card {
+    background-color: #F5F0E8;
+    border: 1px solid rgba(45,59,47,0.15);
+    color: #1b1b1d;
+  }
+
+  /* ── Screen transition animations ── */
+  .screen-exit { animation: screenExit 0.3s ease forwards; }
+  .screen-enter { animation: screenEnter 0.35s ease forwards; }
+  @keyframes screenExit {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes screenEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HUD Timer bar animation ── */
+  @keyframes timerDrain {
+    from { width: 100%; }
+    to   { width: 0%; }
+  }
+
+  /* ── Terrain color accents ── */
+  .terrain-teal   { color: #4A7C6F; }
+  .terrain-border { border: 1px solid rgba(255,255,255,0.1); }
+  .input-ghost {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #4A7C6F;
+    outline: none;
+  }
+  .input-ghost:focus { border-bottom-color: #FF9900; }
+
+  /* ── Hide scrollbar utility ── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Dot-leader lines (for leaderboard/results) ── */
+  .dot-leader {
+    flex-grow: 1;
+    border-bottom: 1px dotted rgba(255,255,255,0.15);
+    margin: 0 12px;
+    position: relative;
+    top: -6px;
+  }
+
+  /* ── Floating label inputs ── */
+  .float-group { position: relative; }
+  .float-group input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(138,151,169,0.5);
+    color: #ffffff;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    padding: 20px 0 8px 0;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .float-group input:focus {
+    border-bottom-color: #FF9900;
+  }
+  .float-group label {
+    position: absolute;
+    left: 0;
+    top: 20px;
+    font-size: 14px;
+    color: #8a97a9;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: top 0.2s, font-size 0.2s, color 0.2s;
+  }
+  .float-group input:focus ~ label,
+  .float-group input:not(:placeholder-shown) ~ label {
+    top: 2px;
+    font-size: 10px;
+    color: #FF9900;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── Screen hidden ── */
+  .hidden { display: none !important; }
+
+  /* ── Bento tile hover ── */
+  .bento-tile {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+  .bento-tile:hover {
+    transform: translateY(-4px);
+    background-color: rgba(0,0,0,0.55);
+  }
+  .bento-tile:hover .tile-icon {
+    transform: scale(1.1);
+  }
+  .tile-icon {
+    transition: transform 0.2s ease;
+  }
+
+  /* ── Orange CTA button base ── */
+  .btn-cta {
+    background-color: #FF9900;
+    color: #1b1b1d;
+    font-weight: 800;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,153,0,0.35);
+  }
+  .btn-cta:active {
+    transform: translateY(0);
+  }
+
+  /* ── Brief paper card interior ── */
+  .brief-map-texture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image:
+      linear-gradient(45deg, #2D3B2F 25%, transparent 25%, transparent 75%, #2D3B2F 75%),
+      linear-gradient(45deg, #2D3B2F 25%, transparent 25%, transparent 75%, #2D3B2F 75%);
+    background-size: 10px 10px;
+    background-position: 0 0, 5px 5px;
+  }
+
+  /* ── Attempt dot indicators ── */
+  .attempt-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(45,59,47,0.15);
+    border: 1px solid rgba(45,59,47,0.3);
+    display: inline-block;
+  }
+  .attempt-dot.filled {
+    background-color: #4A7C6F;
+    border-color: #4A7C6F;
+  }
+</style>
+</head>
+
+<body class="topo-bg min-h-screen antialiased">
+
+<!-- ============================================ -->
+<!-- ADAPTIVE HEADER - TWO MODES                -->
+<!-- ============================================ -->
+
+<!-- MENU mode header -->
+<header id="header-menu" class="fixed top-0 w-full z-50 bg-[#0a1520]/90 backdrop-blur-md border-b border-white/10 flex justify-between items-center px-6 py-3 transition-all duration-300">
+  <span class="text-lg font-black tracking-widest text-white uppercase">Atlas Explorer</span>
+  <nav class="hidden md:flex items-center gap-8">
+    <a href="#" class="text-[#8a97a9] hover:text-[#febd69] transition-colors text-sm font-semibold uppercase tracking-wide">Map</a>
+    <a href="#" class="text-[#8a97a9] hover:text-[#febd69] transition-colors text-sm font-semibold uppercase tracking-wide">Archive</a>
+    <a href="#" onclick="showScreen('screen-leaderboard'); return false;" class="text-[#8a97a9] hover:text-[#febd69] transition-colors text-sm font-semibold uppercase tracking-wide">Rankings</a>
+    <a href="#" class="text-[#fe9800] border-b-2 border-[#fe9800] pb-0.5 text-sm font-semibold uppercase tracking-wide">Profile</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <span class="text-[#fe9800] text-sm font-semibold" id="hdr-stats-menu">Stats: 0</span>
+    <button class="text-[#8a97a9] hover:text-[#febd69] transition-colors"><span class="material-symbols-outlined">account_circle</span></button>
+    <button class="text-[#8a97a9] hover:text-[#febd69] transition-colors"><span class="material-symbols-outlined">military_tech</span></button>
+  </div>
+</header>
+
+<!-- GAMEPLAY mode header -->
+<header id="header-hud" class="hidden fixed top-0 w-full z-50 bg-[#0a1520]/90 backdrop-blur-md border-b border-white/10 flex justify-between items-center px-6 py-3 transition-all duration-300">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[#fe9800] text-2xl" style="font-variation-settings:'FILL' 1">explore</span>
+    <div>
+      <p class="text-white font-black tracking-widest text-sm uppercase" id="hdr-game-title">Code Drop</p>
+      <p class="text-[#8a97a9] text-xs uppercase tracking-widest" id="hdr-level-label">Level 1 / 4</p>
+    </div>
+  </div>
+  <div class="flex gap-6 items-center">
+    <div class="text-right">
+      <p class="text-[#8a97a9] text-xs uppercase tracking-widest">Score</p>
+      <p class="text-[#fe9800] font-black text-xl" id="hdr-score">0</p>
+    </div>
+    <div class="w-px h-8 bg-white/10"></div>
+    <div class="flex items-center gap-1 text-[#4A7C6F]">
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">local_fire_department</span>
+      <span class="text-sm font-semibold" id="hdr-streak">0x</span>
+    </div>
+    <button onclick="pauseGame()" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+      <span class="material-symbols-outlined text-white text-sm">pause</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================ -->
+<!-- SCREEN 1: LANDING / SIGN-UP                -->
+<!-- ============================================ -->
+<section id="screen-landing" class="relative min-h-screen pt-16 flex flex-col md:flex-row w-full max-w-[1440px] mx-auto">
+
+  <!-- Left Panel: Form & Info (5/12) -->
+  <div class="w-full md:w-5/12 flex flex-col justify-center px-12 py-16 bg-[#0a1520]/70 backdrop-blur-sm border-r border-white/10 relative z-10">
+
+    <!-- Title + Subtitle -->
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[#fe9800] text-xl" style="font-variation-settings:'FILL' 1">explore</span>
+        <span class="text-[#8a97a9] text-xs font-bold uppercase tracking-widest">Geography Challenge</span>
+      </div>
+      <h1 style="font-size:48px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;" class="text-white mb-4">Atlas<br>Explorer</h1>
+      <p class="text-[#8a97a9] text-lg leading-relaxed">A high-speed geographic challenge run across North America.</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="flex items-center justify-between gap-3 mb-8 py-4 border-y border-white/10 bg-black/30 rounded-lg px-5">
+      <div class="flex flex-col items-center">
+        <span class="text-[#FF9900] font-black text-2xl leading-none">4</span>
+        <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest mt-1">Levels</span>
+      </div>
+      <div class="w-px h-8 bg-white/10"></div>
+      <div class="flex flex-col items-center">
+        <span class="text-[#FF9900] font-black text-2xl leading-none">70%</span>
+        <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest mt-1">To Clear</span>
+      </div>
+      <div class="w-px h-8 bg-white/10"></div>
+      <div class="flex flex-col items-center">
+        <span class="text-[#FF9900] font-black text-2xl leading-none">12</span>
+        <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest mt-1">Stars Max</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="landing-form" onsubmit="handleLandingSubmit(event)" class="flex flex-col gap-7">
+
+      <div class="float-group">
+        <input type="text" id="input-player-tag" placeholder=" " autocomplete="off" required/>
+        <label for="input-player-tag">Player Tag</label>
+      </div>
+
+      <div class="float-group">
+        <input type="text" id="input-wave-code" placeholder=" " autocomplete="off" required/>
+        <label for="input-wave-code">iCube Wave Code</label>
+      </div>
+
+      <div class="float-group">
+        <input type="text" id="input-trainer-name" placeholder=" " autocomplete="off" required/>
+        <label for="input-trainer-name">Name of the Trainer</label>
+      </div>
+
+      <button type="submit" class="btn-cta mt-2 py-4 px-8 text-base flex items-center justify-center gap-3">
+        <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">rocket_launch</span>
+        Start the Run
+      </button>
+
+    </form>
+
+    <!-- Footer note -->
+    <p class="text-[#535f70] text-xs mt-6 leading-relaxed">Complete all 4 levels to unlock your Mission Report and leaderboard ranking.</p>
+  </div>
+
+  <!-- Right Panel: Bento Grid (7/12) -->
+  <div class="w-full md:w-7/12 relative min-h-[500px] flex items-center justify-center px-10 py-16">
+
+    <!-- Background topo glow -->
+    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      <div style="position:absolute; top:20%; left:30%; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(74,124,111,0.12) 0%, transparent 70%);"></div>
+      <div style="position:absolute; bottom:15%; right:20%; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, rgba(254,152,0,0.07) 0%, transparent 70%);"></div>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-2 gap-5 w-full max-w-2xl z-10 relative">
+
+      <!-- Tile 1: Code Drop -->
+      <div class="bento-tile bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between cursor-pointer" style="min-height:200px;">
+        <div class="flex justify-between items-start mb-8">
+          <span class="material-symbols-outlined text-[#fe9800] text-3xl tile-icon" style="font-variation-settings:'FILL' 1">pin_drop</span>
+          <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest border border-white/15 px-2.5 py-1 rounded-md">01</span>
+        </div>
+        <div>
+          <h3 class="text-white font-bold text-xl mb-1">Code Drop</h3>
+          <p class="text-[#8a97a9] text-xs font-semibold uppercase tracking-wide">Precision deployment</p>
+        </div>
+      </div>
+
+      <!-- Tile 2: Pin Rush (offset down) -->
+      <div class="bento-tile bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between cursor-pointer md:translate-y-8" style="min-height:200px;">
+        <div class="flex justify-between items-start mb-8">
+          <span class="material-symbols-outlined text-[#fe9800] text-3xl tile-icon" style="font-variation-settings:'FILL' 1">speed</span>
+          <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest border border-white/15 px-2.5 py-1 rounded-md">02</span>
+        </div>
+        <div>
+          <h3 class="text-white font-bold text-xl mb-1">Pin Rush</h3>
+          <p class="text-[#8a97a9] text-xs font-semibold uppercase tracking-wide">Time-attack navigation</p>
+        </div>
+      </div>
+
+      <!-- Tile 3: City Stack -->
+      <div class="bento-tile bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between cursor-pointer" style="min-height:200px;">
+        <div class="flex justify-between items-start mb-8">
+          <span class="material-symbols-outlined text-[#fe9800] text-3xl tile-icon" style="font-variation-settings:'FILL' 1">layers</span>
+          <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest border border-white/15 px-2.5 py-1 rounded-md">03</span>
+        </div>
+        <div>
+          <h3 class="text-white font-bold text-xl mb-1">City Stack</h3>
+          <p class="text-[#8a97a9] text-xs font-semibold uppercase tracking-wide">Vertical urban challenge</p>
+        </div>
+      </div>
+
+      <!-- Tile 4: Zone Sprint (offset down) -->
+      <div class="bento-tile bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between cursor-pointer md:translate-y-8" style="min-height:200px;">
+        <div class="flex justify-between items-start mb-8">
+          <span class="material-symbols-outlined text-[#fe9800] text-3xl tile-icon" style="font-variation-settings:'FILL' 1">route</span>
+          <span class="text-[#8a97a9] text-[10px] font-bold uppercase tracking-widest border border-white/15 px-2.5 py-1 rounded-md">04</span>
+        </div>
+        <div>
+          <h3 class="text-white font-bold text-xl mb-1">Zone Sprint</h3>
+          <p class="text-[#8a97a9] text-xs font-semibold uppercase tracking-wide">Sector clearance</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================ -->
+<!-- SCREEN 2: LEVEL BRIEF (dynamic)            -->
+<!-- ============================================ -->
+<section id="screen-brief" class="hidden relative min-h-screen pt-16 flex flex-col items-center justify-center px-6 py-12">
+
+  <!-- Subtle radial glow behind card -->
+  <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; height:600px; border-radius:50%; background:radial-gradient(circle, rgba(74,124,111,0.08) 0%, transparent 65%);"></div>
+  </div>
+
+  <div class="w-full max-w-2xl relative z-10 flex flex-col gap-6">
+
+    <!-- Page header -->
+    <div class="flex justify-between items-end border-b border-white/10 pb-5">
+      <div>
+        <span class="text-[#8a97a9] text-xs font-bold uppercase tracking-widest block mb-1">Atlas Explorer</span>
+        <h1 id="brief-title" class="text-white font-black text-4xl leading-tight" style="letter-spacing:-0.02em;">Code Drop</h1>
+      </div>
+      <div class="text-right">
+        <span class="text-[#8a97a9] text-xs font-bold uppercase tracking-widest block mb-1">Level</span>
+        <div class="bg-[#0a1520] border border-white/15 text-white text-sm font-bold px-3 py-1.5 rounded-lg">
+          <span id="brief-level">1 / 4</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paper Card -->
+    <div class="paper-card rounded-xl relative overflow-hidden brief-map-texture" style="box-shadow: 0 2px 8px rgba(45,59,47,0.12);">
+      <div class="relative z-10 p-7 flex flex-col gap-6">
+
+        <!-- Icon + Mission Brief -->
+        <div class="flex items-start gap-5">
+          <div class="bg-[#e4e2e3] border border-[rgba(45,59,47,0.15)] rounded-full p-3.5 flex items-center justify-center flex-shrink-0">
+            <span id="brief-icon" class="material-symbols-outlined text-[#44474c] text-2xl" style="font-variation-settings:'FILL' 0;">pin_drop</span>
+          </div>
+          <div class="flex-1 pt-0.5">
+            <h2 class="text-[#1b1b1d] font-bold text-xl mb-2">Mission Brief</h2>
+            <p id="brief-desc" class="text-[#44474c] text-base leading-relaxed">Type the 2-letter state or province code as they fall. Keep your streak alive to earn maximum stars!</p>
+          </div>
+        </div>
+
+        <!-- Separator -->
+        <div class="border-t border-dotted border-[rgba(45,59,47,0.25)]"></div>
+
+        <!-- Attempt counter + Star placeholders -->
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-[#75777c] text-xs font-bold uppercase tracking-widest block mb-1.5">Attempt</span>
+            <div class="flex items-center gap-2">
+              <span id="brief-attempt-num" class="text-[#1b1b1d] text-sm font-bold">1</span>
+              <span class="text-[#75777c] text-xs">/ 3</span>
+              <div class="flex gap-1.5 ml-2" id="brief-attempt-dots">
+                <span class="attempt-dot filled"></span>
+                <span class="attempt-dot"></span>
+                <span class="attempt-dot"></span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[#75777c] text-xs font-bold uppercase tracking-widest mr-2">Stars</span>
+            <span class="material-symbols-outlined text-[#c5c6cc] text-2xl" style="font-variation-settings:'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[#c5c6cc] text-2xl" style="font-variation-settings:'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[#c5c6cc] text-2xl" style="font-variation-settings:'FILL' 1;">star</span>
+          </div>
+        </div>
+
+        <!-- Previous stars (shown on retry) -->
+        <div id="brief-prev-stars-row" class="hidden flex items-center gap-2 bg-[rgba(45,59,47,0.06)] rounded-lg px-4 py-2.5 border border-[rgba(45,59,47,0.1)]">
+          <span class="material-symbols-outlined text-[#4A7C6F] text-lg" style="font-variation-settings:'FILL' 1;">history</span>
+          <span class="text-[#44474c] text-xs font-semibold uppercase tracking-wide">Previous best:</span>
+          <div class="flex gap-0.5" id="brief-prev-stars">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Begin Descent CTA -->
+    <div class="flex justify-center mt-2">
+      <button onclick="beginDescent()" class="btn-cta py-4 px-14 text-base flex items-center gap-3">
+        Begin Descent
+        <span class="material-symbols-outlined text-xl">south</span>
+      </button>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ============================================ -->
+<!-- SCREENS 3-10: PLACEHOLDERS                 -->
+<!-- (will be filled in Parts 2, 3, 4)          -->
+<!-- ============================================ -->
+<section id="screen-code-drop" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Code Drop — coming in Part 2</p>
+</section>
+
+<section id="screen-pin-rush" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Pin Rush — coming in Part 2</p>
+</section>
+
+<section id="screen-city-stack" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">City Stack — coming in Part 3</p>
+</section>
+
+<section id="screen-zone-sprint" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Zone Sprint — coming in Part 3</p>
+</section>
+
+<section id="screen-pass" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Level Cleared — coming in Part 4</p>
+</section>
+
+<section id="screen-fail" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Run It Back — coming in Part 4</p>
+</section>
+
+<section id="screen-results" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Mission Report — coming in Part 4</p>
+</section>
+
+<section id="screen-leaderboard" class="hidden relative min-h-screen pt-16 flex items-center justify-center">
+  <p class="text-[#8a97a9]">Rankings &amp; Achievements — coming in Part 4</p>
+</section>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT — GLOBAL STATE + CORE FUNCTIONS -->
+<!-- ============================================ -->
+<script>
+/* ── Global App State ── */
+const AppState = {
+  currentScreen: 'screen-landing',
+  playerTag: '',
+  waveCode: '',
+  trainerName: '',
+  totalScore: 0,
+  currentGame: 0, // 0=CodeDrop, 1=PinRush, 2=CityStack, 3=ZoneSprint
+  gameScores: [0, 0, 0, 0],
+  gameStars: [0, 0, 0, 0],
+  attempts: [0, 0, 0, 0],
+  badges: [],
+  // per-game state (games will add their own fields)
+};
+
+/* ── Screen navigation ── */
+function showScreen(id, transition = 'fade') {
+  const current = document.getElementById(AppState.currentScreen);
+  const next = document.getElementById(id);
+  if (!next) return;
+  current?.classList.add('screen-exit');
+  setTimeout(() => {
+    current?.classList.add('hidden');
+    current?.classList.remove('screen-exit');
+    next.classList.remove('hidden');
+    next.classList.add('screen-enter');
+    setTimeout(() => next.classList.remove('screen-enter'), 350);
+    AppState.currentScreen = id;
+  }, 300);
+}
+
+/* ── Header mode switching ── */
+function setHeaderMode(mode) {
+  const menu = document.getElementById('header-menu');
+  const hud  = document.getElementById('header-hud');
+  if (mode === 'menu') {
+    menu.classList.remove('hidden');
+    hud.classList.add('hidden');
+  } else {
+    menu.classList.add('hidden');
+    hud.classList.remove('hidden');
+  }
+}
+
+function updateHUD(title, level, score, streak) {
+  document.getElementById('hdr-game-title').textContent = title;
+  document.getElementById('hdr-level-label').textContent = level;
+  document.getElementById('hdr-score').textContent = score.toLocaleString();
+  document.getElementById('hdr-streak').textContent = streak + 'x';
+}
+
+function pauseGame() { /* placeholder — implemented in Parts 2/3 */ }
+
+/* ── Landing form submit ── */
+function handleLandingSubmit(e) {
+  e.preventDefault();
+  const tag     = document.getElementById('input-player-tag').value.trim();
+  const code    = document.getElementById('input-wave-code').value.trim();
+  const trainer = document.getElementById('input-trainer-name').value.trim();
+  if (!tag || !code || !trainer) return;
+  AppState.playerTag    = tag;
+  AppState.waveCode     = code;
+  AppState.trainerName  = trainer;
+  // Update header stats display
+  document.getElementById('hdr-stats-menu').textContent = 'Stats: 0';
+  // Switch to gameplay mode and go to brief
+  setHeaderMode('gameplay');
+  startBriefScreen(0);
+  showScreen('screen-brief');
+}
+
+/* ── Game metadata ── */
+const gameData = [
+  {
+    title: 'Code Drop',
+    icon:  'pin_drop',
+    desc:  'Type the 2-letter state or province code as they fall. Keep your streak alive to earn maximum stars!'
+  },
+  {
+    title: 'Pin Rush',
+    icon:  'speed',
+    desc:  'Locate each state on the map before time runs out. Fewer clues used = more points.'
+  },
+  {
+    title: 'City Stack',
+    icon:  'layers',
+    desc:  'Drag each city card into its correct region bucket. Speed and accuracy both count.'
+  },
+  {
+    title: 'Zone Sprint',
+    icon:  'route',
+    desc:  'Classify each location by terrain type. Use the compass ring. Stay on your streak!'
+  },
+];
+
+/* ── Brief screen setup ── */
+function startBriefScreen(gameIndex) {
+  AppState.currentGame = gameIndex;
+  const g = gameData[gameIndex];
+
+  document.getElementById('brief-title').textContent   = g.title;
+  document.getElementById('brief-icon').textContent    = g.icon;
+  document.getElementById('brief-desc').textContent    = g.desc;
+  document.getElementById('brief-level').textContent   = (gameIndex + 1) + ' / 4';
+  document.getElementById('brief-attempt-num').textContent = (AppState.attempts[gameIndex] + 1);
+  document.getElementById('hdr-game-title').textContent = g.title;
+  document.getElementById('hdr-level-label').textContent = 'Level ' + (gameIndex + 1) + ' / 4';
+
+  // Render attempt dots (max 3)
+  const dotsEl = document.getElementById('brief-attempt-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'attempt-dot' + (i < (AppState.attempts[gameIndex] + 1) ? ' filled' : '');
+    dotsEl.appendChild(dot);
+  }
+
+  // Show previous stars row if this is a retry
+  const prevRow = document.getElementById('brief-prev-stars-row');
+  const prevStars = AppState.gameStars[gameIndex];
+  if (AppState.attempts[gameIndex] > 0 && prevStars > 0) {
+    prevRow.classList.remove('hidden');
+    const starsEl = document.getElementById('brief-prev-stars');
+    starsEl.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement('span');
+      s.className = 'material-symbols-outlined text-lg';
+      s.style.fontVariationSettings = "'FILL' 1";
+      s.style.color = i < prevStars ? '#FF9900' : '#c5c6cc';
+      s.textContent = 'star';
+      starsEl.appendChild(s);
+    }
+  } else {
+    prevRow.classList.add('hidden');
+  }
+}
+
+/* ── Begin Descent ── */
+function beginDescent() {
+  const screens  = ['screen-code-drop', 'screen-pin-rush', 'screen-city-stack', 'screen-zone-sprint'];
+  const startFns = [startCodeDrop, startPinRush, startCityStack, startZoneSprint];
+  showScreen(screens[AppState.currentGame]);
+  startFns[AppState.currentGame]();
+}
+
+/* ── Game start stubs (implemented in Parts 2 & 3) ── */
+function startCodeDrop()  {}
+function startPinRush()   {}
+function startCityStack() {}
+function startZoneSprint(){}
+</script>
+
+<!-- ============================================ -->
+<!-- PART 2: Code Drop + Pin Rush -->
+<!-- ============================================ -->
+
+<style>
+@keyframes cdFall {
+  from { transform: translateY(-60px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+.cd-fall { animation: cdFall 0.4s ease forwards; }
+@keyframes cdCorrect {
+  0%,100% { background: rgba(255,255,255,0.05); }
+  50%      { background: rgba(74,124,111,0.4); }
+}
+.cd-correct { animation: cdCorrect 0.5s ease; }
+@keyframes cdWrong {
+  0%,100%  { transform: translateX(0); background: rgba(255,255,255,0.05); }
+  20%,60%  { transform: translateX(-8px); background: rgba(186,26,26,0.3); }
+  40%,80%  { transform: translateX(8px);  background: rgba(186,26,26,0.3); }
+}
+.cd-wrong { animation: cdWrong 0.5s ease; }
+</style>
+
+<!-- SCREEN 3: Code Drop -->
+<section id="screen-code-drop" class="hidden fixed inset-0 bg-[#0e1a28] flex flex-col pt-16 overflow-hidden">
+  <!-- topo overlay -->
+  <div class="absolute inset-0 pointer-events-none opacity-30" style="background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(83,95,112,0.05) 30px,rgba(83,95,112,0.06) 31px),repeating-linear-gradient(90deg,transparent,transparent 50px,rgba(83,95,112,0.03) 50px,rgba(83,95,112,0.04) 51px)"></div>
+
+  <!-- Progress pill -->
+  <div class="relative z-10 flex justify-center pt-4 pb-2">
+    <div class="bg-[#4A7C6F]/20 backdrop-blur-sm terrain-border px-4 py-2 rounded-full flex items-center gap-3">
+      <span class="text-[#4A7C6F] text-xs font-bold uppercase tracking-widest">US States &amp; Provinces</span>
+      <div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div id="cd-progress-bar" class="h-full bg-[#4A7C6F] rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+      <span id="cd-progress-pct" class="text-white text-xs font-semibold">0%</span>
+    </div>
+  </div>
+
+  <!-- Main gameplay area -->
+  <div class="flex-1 flex flex-col items-center justify-center relative z-10 px-4">
+    <!-- Ripple background rings -->
+    <div class="absolute w-[500px] h-[500px] rounded-full border border-[#4A7C6F]/10 pointer-events-none"></div>
+    <div class="absolute w-[350px] h-[350px] rounded-full border border-[#4A7C6F]/15 pointer-events-none"></div>
+
+    <!-- Falling word card -->
+    <div id="cd-word-card" class="relative mb-12">
+      <div id="cd-word" class="font-black text-white px-10 py-6 text-5xl md:text-6xl tracking-tight bg-white/5 rounded-xl terrain-border shadow-[0_4px_24px_rgba(74,124,111,0.2)] transition-all duration-300">
+        Loading...
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="flex flex-col items-center gap-6 w-full max-w-sm">
+      <input
+        id="cd-input"
+        type="text"
+        maxlength="2"
+        placeholder="??"
+        autocomplete="off"
+        class="input-ghost text-center font-black text-[#fe9800] w-48 pb-2 text-5xl tracking-[0.5em] uppercase placeholder-white/20 block mx-auto"
+        onkeydown="if(event.key==='Enter'||this.value.length>=2){submitCodeDrop()}"
+        oninput="if(this.value.length>=2){setTimeout(()=>submitCodeDrop(),50)}"
+      />
+      <div class="flex gap-4">
+        <button id="cd-hint-btn" onclick="useHintCD()" class="px-5 py-3 rounded-lg bg-white/5 terrain-border text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">lightbulb</span> Hint (3)
+        </button>
+        <button onclick="submitCodeDrop()" class="px-8 py-3 rounded-lg bg-[#FF9900] text-[#271500] font-bold uppercase tracking-widest text-xs hover:bg-[#FF9900]/90 transition-transform active:translate-y-0.5 shadow-[0_2px_4px_rgba(45,59,47,0.3)]">
+          SUBMIT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom HUD -->
+  <div class="relative z-10 flex justify-between items-center px-8 py-4 bg-[#0a1520]/80 border-t border-white/10">
+    <div id="cd-streak" class="flex items-center gap-2 text-[#4A7C6F]">
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">local_fire_department</span>
+      <span class="text-sm font-semibold">Streak: 0</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[#8a97a9] text-sm">timer</span>
+      <span id="cd-timer" class="text-[#fe9800] font-black text-xl">60s</span>
+    </div>
+    <div class="text-right">
+      <p class="text-[#8a97a9] text-xs uppercase tracking-widest">Score</p>
+      <p id="cd-score-display" class="text-white font-black">0</p>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN 4: Pin Rush -->
+<section id="screen-pin-rush" class="hidden fixed inset-0 bg-[#0e1a28] flex flex-col pt-16 overflow-hidden">
+  <!-- Timer bar -->
+  <div class="h-1.5 bg-[#232f3e] w-full relative shrink-0">
+    <div id="pr-timer-bar" class="h-full bg-[#fe9800] absolute top-0 left-0 rounded-r-full shadow-[0_0_8px_rgba(254,152,0,0.5)]" style="width:100%"></div>
+  </div>
+
+  <!-- Target HUD -->
+  <div class="relative z-10 flex justify-between items-center px-6 py-3 bg-[#232f3e]/60 border-b border-white/5 shrink-0">
+    <div>
+      <p class="text-[#8a97a9] text-xs font-bold uppercase tracking-widest mb-0.5">Target Location</p>
+      <h2 class="text-white font-black text-2xl">Locate: <span id="pr-target-name" class="text-[#fe9800]">Texas</span></h2>
+    </div>
+    <div class="text-right">
+      <p class="text-[#8a97a9] text-xs uppercase tracking-widest">Time</p>
+      <p id="pr-timer-text" class="text-[#fe9800] font-black text-xl">20s</p>
+    </div>
+  </div>
+
+  <!-- Map container -->
+  <div class="flex-1 relative overflow-hidden flex items-center justify-center bg-[#111d2c] border-b border-white/5">
+    <svg id="pr-map" viewBox="0 0 800 480" class="w-full h-full max-h-[55vh]" style="max-width:900px">
+      <style>
+        #pr-map rect, #pr-map polygon {
+          fill: #1e2d3d; stroke: #3a5070; stroke-width: 1;
+          cursor: pointer; transition: fill 0.2s;
+        }
+        #pr-map rect:hover, #pr-map polygon:hover { fill: #2a3f56; }
+        #pr-map text { fill: #6a85a0; font-size: 8px; font-family: Inter, sans-serif; font-weight: 700; pointer-events: none; }
+      </style>
+
+      <!-- Pacific Northwest -->
+      <rect data-state="WA" x="50" y="30" width="100" height="75" onclick="clickState('WA',this)"/><text x="95" y="72">WA</text>
+      <rect data-state="OR" x="50" y="105" width="108" height="95" onclick="clickState('OR',this)"/><text x="95" y="157">OR</text>
+      <rect data-state="CA" x="50" y="200" width="95" height="160" onclick="clickState('CA',this)"/><text x="88" y="282">CA</text>
+
+      <!-- Mountain West -->
+      <rect data-state="ID" x="158" y="30" width="80" height="125" onclick="clickState('ID',this)"/><text x="190" y="97">ID</text>
+      <rect data-state="MT" x="238" y="30" width="120" height="95" onclick="clickState('MT',this)"/><text x="290" y="82">MT</text>
+      <rect data-state="WY" x="238" y="125" width="100" height="88" onclick="clickState('WY',this)"/><text x="280" y="170">WY</text>
+      <rect data-state="NV" x="148" y="158" width="80" height="115" onclick="clickState('NV',this)"/><text x="180" y="220">NV</text>
+      <rect data-state="UT" x="228" y="213" width="80" height="95" onclick="clickState('UT',this)"/><text x="260" y="265">UT</text>
+      <rect data-state="AZ" x="228" y="308" width="98" height="110" onclick="clickState('AZ',this)"/><text x="268" y="365">AZ</text>
+      <rect data-state="CO" x="308" y="213" width="100" height="88" onclick="clickState('CO',this)"/><text x="350" y="260">CO</text>
+      <rect data-state="NM" x="278" y="301" width="108" height="110" onclick="clickState('NM',this)"/><text x="320" y="358">NM</text>
+
+      <!-- Plains -->
+      <rect data-state="ND" x="358" y="30" width="108" height="78" onclick="clickState('ND',this)"/><text x="400" y="74">ND</text>
+      <rect data-state="SD" x="358" y="108" width="108" height="78" onclick="clickState('SD',this)"/><text x="400" y="150">SD</text>
+      <rect data-state="NE" x="358" y="186" width="108" height="68" onclick="clickState('NE',this)"/><text x="400" y="224">NE</text>
+      <rect data-state="KS" x="358" y="254" width="108" height="68" onclick="clickState('KS',this)"/><text x="400" y="292">KS</text>
+      <rect data-state="OK" x="353" y="322" width="120" height="65" onclick="clickState('OK',this)"/><text x="403" y="358">OK</text>
+      <polygon data-state="TX" points="308,387 468,387 468,440 420,475 308,475 278,420" onclick="clickState('TX',this)"/><text x="370" y="435">TX</text>
+
+      <!-- Midwest -->
+      <rect data-state="MN" x="466" y="30" width="100" height="108" onclick="clickState('MN',this)"/><text x="508" y="88">MN</text>
+      <rect data-state="IA" x="466" y="186" width="100" height="68" onclick="clickState('IA',this)"/><text x="508" y="224">IA</text>
+      <rect data-state="MO" x="466" y="254" width="100" height="78" onclick="clickState('MO',this)"/><text x="508" y="296">MO</text>
+      <rect data-state="AR" x="466" y="332" width="100" height="68" onclick="clickState('AR',this)"/><text x="508" y="370">AR</text>
+      <rect data-state="LA" x="466" y="400" width="90" height="68" onclick="clickState('LA',this)"/><text x="503" y="437">LA</text>
+      <rect data-state="WI" x="528" y="60" width="78" height="108" onclick="clickState('WI',this)"/><text x="559" y="118">WI</text>
+      <rect data-state="IL" x="541" y="168" width="68" height="110" onclick="clickState('IL',this)"/><text x="568" y="226">IL</text>
+      <rect data-state="MS" x="526" y="358" width="68" height="78" onclick="clickState('MS',this)"/><text x="552" y="400">MS</text>
+
+      <!-- Great Lakes -->
+      <rect data-state="MI" x="578" y="30" width="88" height="98" onclick="clickState('MI',this)"/><text x="614" y="84">MI</text>
+      <rect data-state="IN" x="586" y="168" width="60" height="88" onclick="clickState('IN',this)"/><text x="608" y="216">IN</text>
+      <rect data-state="OH" x="636" y="128" width="78" height="98" onclick="clickState('OH',this)"/><text x="668" y="180">OH</text>
+
+      <!-- Southeast -->
+      <rect data-state="KY" x="596" y="256" width="108" height="68" onclick="clickState('KY',this)"/><text x="642" y="294">KY</text>
+      <rect data-state="TN" x="566" y="316" width="118" height="58" onclick="clickState('TN',this)"/><text x="618" y="349">TN</text>
+      <rect data-state="AL" x="586" y="354" width="68" height="88" onclick="clickState('AL',this)"/><text x="613" y="401">AL</text>
+      <rect data-state="GA" x="634" y="306" width="78" height="98" onclick="clickState('GA',this)"/><text x="665" y="358">GA</text>
+      <rect data-state="FL" x="634" y="396" width="88" height="78" onclick="clickState('FL',this)"/><text x="670" y="438">FL</text>
+      <rect data-state="SC" x="692" y="288" width="58" height="68" onclick="clickState('SC',this)"/><text x="713" y="326">SC</text>
+      <rect data-state="NC" x="656" y="233" width="98" height="58" onclick="clickState('NC',this)"/><text x="696" y="266">NC</text>
+      <rect data-state="VA" x="661" y="183" width="88" height="53" onclick="clickState('VA',this)"/><text x="698" y="213">VA</text>
+      <rect data-state="WV" x="651" y="183" width="58" height="68" onclick="clickState('WV',this)"/><text x="673" y="220">WV</text>
+      <rect data-state="PA" x="656" y="118" width="88" height="68" onclick="clickState('PA',this)"/><text x="692" y="156">PA</text>
+      <rect data-state="NY" x="676" y="48" width="98" height="73" onclick="clickState('NY',this)"/><text x="718" y="88">NY</text>
+      <rect data-state="MD" x="691" y="171" width="58" height="33" onclick="clickState('MD',this)"/><text x="712" y="192">MD</text>
+      <rect data-state="NJ" x="736" y="138" width="28" height="48" onclick="clickState('NJ',this)"/><text x="741" y="165">NJ</text>
+      <rect data-state="DE" x="741" y="178" width="18" height="33" onclick="clickState('DE',this)"/><text x="743" y="198">DE</text>
+      <rect data-state="CT" x="756" y="108" width="28" height="33" onclick="clickState('CT',this)"/><text x="762" y="128">CT</text>
+      <rect data-state="MA" x="741" y="108" width="48" height="33" onclick="clickState('MA',this)"/><text x="756" y="128">MA</text>
+      <rect data-state="RI" x="776" y="108" width="18" height="28" onclick="clickState('RI',this)"/><text x="778" y="126">RI</text>
+      <rect data-state="VT" x="751" y="48" width="33" height="58" onclick="clickState('VT',this)"/><text x="759" y="80">VT</text>
+      <rect data-state="NH" x="756" y="38" width="33" height="58" onclick="clickState('NH',this)"/><text x="764" y="70">NH</text>
+      <rect data-state="ME" x="766" y="18" width="38" height="68" onclick="clickState('ME',this)"/><text x="778" y="55">ME</text>
+
+      <!-- Alaska & Hawaii labels (decorative) -->
+      <rect x="60" y="415" width="55" height="45" rx="3" fill="#161f2a" stroke="#3a5070" stroke-width="0.5"/>
+      <text x="87" y="443" fill="#4a6080" font-size="8">AK</text>
+      <rect x="125" y="430" width="45" height="30" rx="3" fill="#161f2a" stroke="#3a5070" stroke-width="0.5"/>
+      <text x="142" y="448" fill="#4a6080" font-size="8">HI</text>
+    </svg>
+
+    <!-- Map zoom controls -->
+    <div class="absolute right-4 bottom-4 flex flex-col gap-1 bg-[#1a2d3e]/80 backdrop-blur p-2 rounded-xl terrain-border">
+      <button class="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">add</span></button>
+      <div class="h-px bg-white/10"></div>
+      <button class="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"><span class="material-symbols-outlined">remove</span></button>
+    </div>
+  </div>
+
+  <!-- Clue card -->
+  <div class="relative z-10 bg-[#1a2332]/80 border-t border-white/10 p-4 flex items-center gap-4 shrink-0">
+    <div class="w-12 h-12 rounded-full bg-[#432800] border border-[#c48a3b]/30 flex items-center justify-center shrink-0">
+      <span class="material-symbols-outlined text-[#c48a3b]" style="font-variation-settings:'FILL' 1">explore</span>
+    </div>
+    <div class="flex-1">
+      <div class="flex items-center gap-3 mb-1">
+        <h3 id="pr-clue-num" class="text-white font-bold text-base">Clue 1 of 3</h3>
+        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/10 text-[#8a97a9]">Region: US States</span>
+      </div>
+      <p id="pr-clue-text" class="text-[#8a97a9] text-sm leading-relaxed">Loading clue...</p>
+    </div>
+    <button onclick="revealNextClue()" class="shrink-0 px-4 py-3 bg-[#232f3e] hover:bg-[#fe9800] hover:text-[#271500] border border-white/10 rounded-lg text-xs font-bold uppercase tracking-widest text-[#8a97a9] transition-all group">
+      <span class="material-symbols-outlined text-base">lightbulb</span>
+      <span class="block text-[10px]">Hint (-50)</span>
+    </button>
+  </div>
+</section>
+
+<script>
+// ── Code Drop Data ──
+const CODE_DROP_DATA = [
+  {name:'California',code:'CA'},{name:'Texas',code:'TX'},{name:'Florida',code:'FL'},
+  {name:'New York',code:'NY'},{name:'Pennsylvania',code:'PA'},{name:'Illinois',code:'IL'},
+  {name:'Ohio',code:'OH'},{name:'Georgia',code:'GA'},{name:'Michigan',code:'MI'},
+  {name:'North Carolina',code:'NC'},{name:'New Jersey',code:'NJ'},{name:'Virginia',code:'VA'},
+  {name:'Washington',code:'WA'},{name:'Arizona',code:'AZ'},{name:'Tennessee',code:'TN'},
+  {name:'Massachusetts',code:'MA'},{name:'Indiana',code:'IN'},{name:'Missouri',code:'MO'},
+  {name:'Maryland',code:'MD'},{name:'Wisconsin',code:'WI'},{name:'Colorado',code:'CO'},
+  {name:'Minnesota',code:'MN'},{name:'South Carolina',code:'SC'},{name:'Alabama',code:'AL'},
+  {name:'Louisiana',code:'LA'},{name:'Kentucky',code:'KY'},{name:'Oregon',code:'OR'},
+  {name:'Oklahoma',code:'OK'},{name:'Connecticut',code:'CT'},{name:'Utah',code:'UT'}
+];
+
+// ── Pin Rush Data ──
+const PIN_RUSH_DATA = [
+  { state:'TX', name:'Texas', clues:['Second-largest US state by area.','Borders Mexico to the south.','Capital is Austin.'] },
+  { state:'CA', name:'California', clues:['Most populous US state.','Home to Silicon Valley.','Borders the Pacific Ocean to the west.'] },
+  { state:'FL', name:'Florida', clues:['Known as the Sunshine State.','Home to the Everglades.','Southernmost contiguous US state.'] },
+  { state:'NY', name:'New York', clues:['Home to the most populous US city.','Niagara Falls is on its northern border.','Known for Wall Street and Broadway.'] },
+  { state:'CO', name:'Colorado', clues:['Home to the Rocky Mountain range.','Denver is the capital.','Borders 7 other states.'] },
+  { state:'WA', name:'Washington', clues:['Located in the Pacific Northwest.','Named after the first US president.','Borders Canada to the north.'] },
+  { state:'GA', name:'Georgia', clues:['Known as the Peach State.','Home to the busiest airport in the world.','Atlanta is its capital.'] },
+  { state:'OH', name:'Ohio', clues:['Borders Lake Erie to the north.','Nicknamed the Buckeye State.','Columbus is its capital.'] },
+  { state:'MN', name:'Minnesota', clues:['Land of 10,000 Lakes.','Borders Canada to the north.','Minneapolis is its largest city.'] },
+  { state:'AZ', name:'Arizona', clues:['Home to the Grand Canyon.','Borders Mexico to the south.','Phoenix is its capital.'] },
+];
+
+// ── Code Drop Game State ──
+let cdState = {
+  queue: [],
+  currentIdx: 0,
+  score: 0,
+  streak: 0,
+  hints: 3,
+  timer: 60,
+  timerInterval: null,
+  correct: 0,
+  total: 0,
+  active: true
+};
+
+// ── Pin Rush Game State ──
+let prState = {
+  queue: [],
+  currentIdx: 0,
+  score: 0,
+  cluesRevealed: 0,
+  timer: 20,
+  timerInterval: null,
+  correct: 0,
+  total: 0,
+  active: true,
+};
+
+// ── Pass / Fail screen stubs (fully implemented in Part 4) ──
+function showPassScreen(gameIdx, stars, score) {
+  AppState.lastGameIdx = gameIdx;
+  AppState.lastStars = stars;
+  AppState.lastScore = score;
+  setHeaderMode('menu');
+  showScreen('screen-pass');
+  if (typeof updatePassScreen === 'function') updatePassScreen(gameIdx, stars, score);
+}
+function showFailScreen(gameIdx) {
+  AppState.lastGameIdx = gameIdx;
+  setHeaderMode('menu');
+  showScreen('screen-fail');
+  if (typeof updateFailScreen === 'function') updateFailScreen(gameIdx);
+}
+
+// ── Code Drop Functions ──
+// Override the stub defined above
+startCodeDrop = function() {
+  cdState.queue = [...CODE_DROP_DATA].sort(() => Math.random() - 0.5);
+  cdState.currentIdx = 0; cdState.score = 0; cdState.streak = 0;
+  cdState.hints = 3; cdState.timer = 60; cdState.correct = 0; cdState.total = 0;
+  cdState.active = true;
+  clearInterval(cdState.timerInterval);
+  setHeaderMode('gameplay');
+  updateHUD('Code Drop', 'Level 1 / 4', 0, 0);
+  showCDWord();
+  cdState.timerInterval = setInterval(() => {
+    cdState.timer--;
+    const el = document.getElementById('cd-timer');
+    if (el) el.textContent = cdState.timer + 's';
+    if (cdState.timer <= 0) endCodeDrop();
+  }, 1000);
+  setTimeout(() => document.getElementById('cd-input')?.focus(), 100);
+  // Reset hint button label
+  const hintBtn = document.getElementById('cd-hint-btn');
+  if (hintBtn) hintBtn.textContent = '';
+  const hintIcon = document.createElement('span');
+  hintIcon.className = 'material-symbols-outlined text-sm';
+  hintIcon.textContent = 'lightbulb';
+  if (hintBtn) { hintBtn.appendChild(hintIcon); hintBtn.append(' Hint (3)'); }
+};
+
+function showCDWord() {
+  if (cdState.currentIdx >= cdState.queue.length) { endCodeDrop(); return; }
+  const word = cdState.queue[cdState.currentIdx];
+  const el = document.getElementById('cd-word');
+  if (el) {
+    el.textContent = word.name;
+    el.classList.remove('cd-fall', 'cd-correct', 'cd-wrong');
+    void el.offsetWidth;
+    el.classList.add('cd-fall');
+  }
+  const inp = document.getElementById('cd-input');
+  if (inp) { inp.value = ''; inp.focus(); }
+}
+
+function submitCodeDrop() {
+  if (!cdState.active) return;
+  const inp = document.getElementById('cd-input');
+  if (!inp) return;
+  const val = inp.value.trim().toUpperCase();
+  const correct = cdState.queue[cdState.currentIdx].code;
+  cdState.total++;
+  const el = document.getElementById('cd-word');
+  if (val === correct) {
+    cdState.correct++;
+    cdState.streak++;
+    cdState.score += 100 + cdState.streak * 10;
+    el?.classList.add('cd-correct');
+    cdState.currentIdx++;
+    setTimeout(() => showCDWord(), 600);
+  } else {
+    cdState.streak = 0;
+    el?.classList.add('cd-wrong');
+    setTimeout(() => {
+      el?.classList.remove('cd-wrong');
+      inp.value = ''; inp.focus();
+    }, 500);
+  }
+  updateHUD('Code Drop', 'Level 1 / 4', cdState.score, cdState.streak);
+  const scoreEl = document.getElementById('cd-score-display');
+  if (scoreEl) scoreEl.textContent = cdState.score.toLocaleString();
+  const streakEl = document.getElementById('cd-streak')?.querySelector('span:last-child');
+  if (streakEl) streakEl.textContent = 'Streak: ' + cdState.streak;
+  const progressBar = document.getElementById('cd-progress-bar');
+  if (progressBar) progressBar.style.width = (cdState.currentIdx / CODE_DROP_DATA.length * 100) + '%';
+  const progressPct = document.getElementById('cd-progress-pct');
+  if (progressPct) progressPct.textContent = Math.round(cdState.currentIdx / CODE_DROP_DATA.length * 100) + '%';
+}
+
+function useHintCD() {
+  if (cdState.hints <= 0) return;
+  cdState.hints--;
+  const code = cdState.queue[cdState.currentIdx].code;
+  const inp = document.getElementById('cd-input');
+  if (inp) inp.value = code[0];
+  const btn = document.getElementById('cd-hint-btn');
+  if (btn) btn.textContent = 'Hint (' + cdState.hints + ')';
+}
+
+function endCodeDrop() {
+  clearInterval(cdState.timerInterval);
+  cdState.active = false;
+  const accuracy = cdState.total > 0 ? (cdState.correct / cdState.total) : 0;
+  AppState.gameScores[0] = cdState.score;
+  const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : 1;
+  AppState.gameStars[0] = stars;
+  AppState.totalScore += cdState.score;
+  if (accuracy >= 0.7) {
+    showPassScreen(0, stars, cdState.score);
+  } else {
+    AppState.attempts[0]++;
+    showFailScreen(0);
+  }
+}
+
+// ── Pin Rush Functions ──
+// Override the stub defined above
+startPinRush = function() {
+  prState.queue = [...PIN_RUSH_DATA].sort(() => Math.random() - 0.5);
+  prState.currentIdx = 0; prState.score = 0; prState.correct = 0;
+  prState.total = 0; prState.active = true;
+  setHeaderMode('gameplay');
+  updateHUD('Pin Rush', 'Level 2 / 4', 0, 0);
+  showPRQuestion();
+};
+
+function showPRQuestion() {
+  if (prState.currentIdx >= prState.queue.length) { endPinRush(); return; }
+  const q = prState.queue[prState.currentIdx];
+  prState.cluesRevealed = 1;
+  prState.timer = 20;
+  const targetEl = document.getElementById('pr-target-name');
+  if (targetEl) targetEl.textContent = q.name;
+  const clueNumEl = document.getElementById('pr-clue-num');
+  if (clueNumEl) clueNumEl.textContent = 'Clue 1 of 3';
+  const clueTextEl = document.getElementById('pr-clue-text');
+  if (clueTextEl) clueTextEl.textContent = q.clues[0];
+  const timerTextEl = document.getElementById('pr-timer-text');
+  if (timerTextEl) timerTextEl.textContent = '20s';
+  // Reset all state fills
+  document.querySelectorAll('#pr-map path, #pr-map rect, #pr-map polygon').forEach(p => {
+    p.style.fill = '';
+  });
+  // Start timer bar animation
+  clearInterval(prState.timerInterval);
+  const bar = document.getElementById('pr-timer-bar');
+  if (bar) { bar.style.transition = 'none'; bar.style.width = '100%'; }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (bar) { bar.style.transition = 'width 20s linear'; bar.style.width = '0%'; }
+    });
+  });
+  prState.timerInterval = setInterval(() => {
+    prState.timer--;
+    const ttEl = document.getElementById('pr-timer-text');
+    if (ttEl) ttEl.textContent = prState.timer + 's';
+    if (prState.timer <= 0) {
+      clearInterval(prState.timerInterval);
+      prState.total++;
+      prState.currentIdx++;
+      setTimeout(() => showPRQuestion(), 500);
+    }
+  }, 1000);
+}
+
+function clickState(stateCode, el) {
+  if (!prState.active) return;
+  const q = prState.queue[prState.currentIdx];
+  if (!q) return;
+  clearInterval(prState.timerInterval);
+  prState.total++;
+  if (stateCode === q.state) {
+    prState.correct++;
+    const pts = Math.max(50, 200 - (prState.cluesRevealed - 1) * 50 + prState.timer * 5);
+    prState.score += pts;
+    el.style.fill = '#4A7C6F';
+    AppState.totalScore += pts;
+    updateHUD('Pin Rush', 'Level 2 / 4', prState.score, 0);
+    prState.currentIdx++;
+    setTimeout(() => showPRQuestion(), 800);
+  } else {
+    el.style.fill = '#ba1a1a';
+    setTimeout(() => { el.style.fill = ''; }, 600);
+    revealNextClue();
+  }
+}
+
+function revealNextClue() {
+  const q = prState.queue[prState.currentIdx];
+  if (!q) return;
+  prState.cluesRevealed = Math.min(prState.cluesRevealed + 1, 3);
+  const clueNumEl = document.getElementById('pr-clue-num');
+  if (clueNumEl) clueNumEl.textContent = 'Clue ' + prState.cluesRevealed + ' of 3';
+  const clueTextEl = document.getElementById('pr-clue-text');
+  if (clueTextEl) clueTextEl.textContent = q.clues[prState.cluesRevealed - 1];
+}
+
+function endPinRush() {
+  clearInterval(prState.timerInterval);
+  prState.active = false;
+  const accuracy = prState.total > 0 ? prState.correct / prState.total : 0;
+  AppState.gameScores[1] = prState.score;
+  const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : 1;
+  AppState.gameStars[1] = stars;
+  if (accuracy >= 0.7) showPassScreen(1, stars, prState.score);
+  else { AppState.attempts[1]++; showFailScreen(1); }
+}
+</script>
+
+<!-- ============================================ -->
+<!-- PART 3: City Stack + Zone Sprint will be added here -->
+<!-- ============================================ -->

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer - Interstitial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#c48a3b",
+                        "primary-fixed": "#d7e3f7",
+                        "tertiary": "#271500",
+                        "surface-tint": "#535f70",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#432800",
+                        "on-primary-container": "#8a97a9",
+                        "inverse-surface": "#303031",
+                        "surface-bright": "#fbf9fa",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdcbd",
+                        "on-surface": "#1b1b1d",
+                        "surface-container-highest": "#e4e2e3",
+                        "surface-dim": "#dcd9db",
+                        "on-background": "#1b1b1d",
+                        "on-primary-fixed-variant": "#3c4858",
+                        "inverse-primary": "#bbc7db",
+                        "primary-container": "#232f3e",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9fa",
+                        "on-primary-fixed": "#101c2b",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-container": "#f0edee",
+                        "secondary-container": "#fe9800",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#693c00",
+                        "surface": "#fbf9fa",
+                        "tertiary-fixed": "#ffddb7",
+                        "outline-variant": "#c5c6cc",
+                        "on-surface-variant": "#44474c",
+                        "on-secondary-fixed": "#2c1600",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "secondary-fixed-dim": "#ffb86f",
+                        "on-secondary-container": "#643900",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#eae7e9",
+                        "tertiary-fixed-dim": "#fbba67",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f3f0f1",
+                        "primary-fixed-dim": "#bbc7db",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e4e2e3",
+                        "outline": "#75777c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary": "#0e1a28",
+                        "secondary": "#8a5100"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "48px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2-headline": ["Inter"],
+                        "h3-subheading": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1-display": ["Inter"],
+                        "label-numeric": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "h2-headline": ["32px", { "lineHeight": "1.2", "fontWeight": "800" }],
+                        "h3-subheading": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1-display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-numeric": ["14px", { "lineHeight": "1", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Tactical grid overlay */
+        .bg-drafting-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-primary min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden text-on-surface font-body-md antialiased">
+<div class="absolute inset-0 z-0 bg-cover bg-center opacity-20 mix-blend-overlay" data-alt="dark stylized topographical map with subtle elevation lines, cartographic texture, low key lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBwynd4TsVVUv5zkugVBo9kSA5YqJcDE6b39qYJVdd7xp7ZXXBnIah6JfV759JtIfq0C2goF66fHM-Q3qNkSvbdEkINTBvSpTc-m2v0mUtG_njgT2tMOyLwuzzKYuEiGZQp1JvoEHaokpvAQKpAI9nqb-BF5B80bY5OWbXMv5m_vytnpf-RC691KSnJOXfT__DydmaIHoZ__jdK5htlBgdkJI7vEYG3tJFElkf1JgwaDD0S7zR2quf5u-sh-nO0RHQk6bJFaqT2CwBA');">
+</div>
+<div class="absolute inset-0 z-0 bg-drafting-grid pointer-events-none"></div>
+<main class="w-full max-w-md relative z-10">
+<div class="bg-primary-container rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] relative overflow-hidden border border-outline/20">
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary-container"></div>
+<div class="absolute top-0 right-0 p-4 border-b border-l border-outline/20 bg-primary/40 rounded-bl-lg">
+<span class="font-label-numeric text-label-numeric text-outline-variant tracking-wider">ALT-78.2</span>
+</div>
+<div class="p-8 md:p-12 flex flex-col items-center text-center mt-6">
+<div class="w-16 h-16 rounded-full bg-surface-tint/10 border border-outline/30 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-outline-variant" data-icon="warning">warning</span>
+</div>
+<h1 class="font-h1-display text-h1-display text-on-primary mb-4 w-full">RUN IT BACK</h1>
+<p class="font-body-lg text-body-lg text-on-primary-container mb-10 max-w-[280px]">
+                    The terrain parameters shifted unexpectedly. Recalibrate your approach vectors and deploy again.
+                </p>
+<div class="flex items-center justify-center gap-4 mb-10 w-full">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-outline-variant mr-2">ATTEMPTS</span>
+<div class="w-2 h-2 rounded-full bg-outline/40"></div>
+<div class="w-2 h-2 rounded-full bg-outline/40"></div>
+<div class="w-3 h-3 rounded-full bg-secondary-container shadow-[0_0_8px_rgba(254,152,0,0.5)]"></div>
+<div class="w-2 h-2 rounded-full border border-outline/40 bg-transparent"></div>
+</div>
+</div>
+<div class="w-full flex flex-col gap-4">
+<button class="w-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps py-4 px-6 rounded-DEFAULT flex items-center justify-center gap-2 hover:-translate-y-[2px] transition-transform shadow-[0_2px_4px_rgba(45,59,47,0.2)]">
+<span class="material-symbols-outlined icon-fill text-[18px]" data-icon="refresh">refresh</span>
+                        Retry Level
+                    </button>
+<button class="w-full py-4 border-b border-outline/20 text-on-primary-container font-label-caps text-label-caps hover:text-on-primary hover:border-outline-variant transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+                        Abort Expedition
+                    </button>
+</div>
+</div>
+<div class="w-full h-12 bg-primary/50 border-t border-outline/10 flex items-center px-6">
+<div class="w-full border-b-[2px] border-dotted border-outline/30"></div>
+</div>
+</div>
+</main>
+</body></html>

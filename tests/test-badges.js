@@ -53,36 +53,33 @@ test('hot-streak: not awarded when streakPeak < 3', () => {
   assert(!result.some(b => b.id === 'hot-streak'));
 });
 
-test('globe-trotter: awarded when all 4 games passed', () => {
+test('globe-trotter: awarded when all active games passed', () => {
   const session = makeSession([
-    { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
   assert(result.some(b => b.id === 'globe-trotter'));
 });
 
-test('globe-trotter: not awarded when only 3 games passed', () => {
+test('globe-trotter: not awarded when any game is unpassed', () => {
   const session = makeSession([
-    { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: false, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
   assert(!result.some(b => b.id === 'globe-trotter'));
 });
 
-test('diamond-agent: awarded when all 4 games passed on first attempt each', () => {
+test('diamond-agent: awarded when all active games passed on first attempt each', () => {
   const session = makeSession([
-    { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
   assert(result.some(b => b.id === 'diamond-agent'));
 });
 
@@ -90,32 +87,29 @@ test('diamond-agent: not awarded when any game needed 2+ attempts', () => {
   const session = makeSession([
     { passed: true, attempts: [{}, {}] },
     { passed: true, attempts: [{}] },
-    { passed: true, attempts: [{}] },
     { passed: true, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
   assert(!result.some(b => b.id === 'diamond-agent'));
 });
 
-test('star-collector: awarded when all 4 games have 3 stars (12 total)', () => {
+test('star-collector: awarded when all active games have 3 stars', () => {
   const session = makeSession([
-    { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 3, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 20, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 20, totalCount: 20, timerRatio: -1 }, session);
   assert(result.some(b => b.id === 'star-collector'));
 });
 
-test('star-collector: not awarded when total stars < 12', () => {
+test('star-collector: not awarded when total stars are below max', () => {
   const session = makeSession([
-    { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 3, attempts: [{}] },
     { passed: true, stars: 2, attempts: [{}] }
   ]);
-  const result = evaluateBadges(3, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
+  const result = evaluateBadges(2, { correctCount: 14, totalCount: 20, timerRatio: -1 }, session);
   assert(!result.some(b => b.id === 'star-collector'));
 });
 

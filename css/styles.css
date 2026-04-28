@@ -208,6 +208,13 @@ h3 {
   gap: 12px;
 }
 
+.form-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
 .start-form label {
   font-weight: 800;
 }
@@ -260,6 +267,10 @@ h3 {
   background: #eef3f0;
   color: var(--ink);
   border: 1px solid var(--line);
+}
+
+.btn-demo {
+  min-width: 132px;
 }
 
 .btn-success {
@@ -880,8 +891,13 @@ h3 {
   .results-grid,
   .bucket-grid,
   .legend-grid,
-  .challenge-track {
+  .challenge-track,
+  .form-actions {
     grid-template-columns: 1fr;
+  }
+
+  .btn-demo {
+    width: 100%;
   }
 
   .answer-grid,

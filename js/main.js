@@ -8,10 +8,9 @@ import {
 import { calculateStars, isPassed, percentCorrect } from './scoring.js';
 import { evaluateBadges } from './badges.js';
 import { awardBadge, fetchBadges, fetchLeaderboard, isConfigured, submitAttemptScore } from './leaderboard.js';
-import { mountCrackTheCode } from './crack-the-code.js';
+import { mountCrackTheCode } from './crack-the-code.js?v=20260428-code-input-row';
 import { mountPinIt, mountPinReview } from './pin-it.js';
 import { mountCitySorter } from './city-sorter.js';
-import { mountRegionRanger } from './region-ranger.js';
 import { mountResults } from './results.js';
 import { getMotivationalCopy, hasPersonalBest, renderAttemptDots, startRetryCountdown } from './flow-ui.js';
 import { animateCount, launchConfetti, pageWipe, wrapStarsMarkup } from './ui-effects.js';
@@ -22,18 +21,21 @@ const playerSummary = document.getElementById('player-summary');
 const GAME_MOUNTS = {
   crack: mountCrackTheCode,
   pin: mountPinIt,
-  sorter: mountCitySorter,
-  ranger: mountRegionRanger
+  sorter: mountCitySorter
 };
 
 const GAME_ICONS = {
   crack: '01',
   pin: '02',
-  sorter: '03',
-  ranger: '04'
+  sorter: '03'
 };
 
-const TERRAIN_MAP = { crack: 'water', pin: 'desert', sorter: 'forest', ranger: 'mountain' };
+const TERRAIN_MAP = { crack: 'water', pin: 'desert', sorter: 'forest' };
+const START_COPY = {
+  crack: 'Begin descent',
+  pin: 'Open the map',
+  sorter: 'Start stacking'
+};
 
 let session = loadSession();
 
@@ -57,9 +59,11 @@ async function initSession(currentSession) {
   hydrated.justEarnedBadgeIds = Array.isArray(hydrated.justEarnedBadgeIds) ? hydrated.justEarnedBadgeIds : [];
   localStorage.setItem('atlas_agent', hydrated.agent);
 
-  const remoteBadges = await fetchBadges(hydrated.agent);
-  if (remoteBadges.length) {
-    hydrated.earnedBadges = [...new Set([...hydrated.earnedBadges, ...remoteBadges])];
+  if (!isDemoHydrated(hydrated)) {
+    const remoteBadges = await fetchBadges(hydrated.agent);
+    if (remoteBadges.length) {
+      hydrated.earnedBadges = [...new Set([...hydrated.earnedBadges, ...remoteBadges])];
+    }
   }
 
   saveSession(hydrated);
@@ -69,9 +73,11 @@ async function initSession(currentSession) {
 function renderShell() {
   const score = getTotalScore(session);
   const missionIdx = Math.min(session.currentGameIndex + (session.completed ? 0 : 1), GAME_DEFINITIONS.length);
+  const isDemo = isDemoSession();
   playerSummary.innerHTML = `
     <span>${escapeHtml(session.agent)}</span>
     <span class="summary-divider">|</span>
+    ${isDemo ? '<span class="demo-chip">Demo</span><span class="summary-divider">|</span>' : ''}
     <span>${escapeHtml(session.waveCode || '')}</span>
     <span class="summary-divider">|</span>
     <span class="summary-score">${score} pts</span>
@@ -113,34 +119,66 @@ function renderIntro(gameIndex) {
     { top: '50%', left: '75%' }
   ];
   const icon = GAME_ICONS[definition.key] || 'PLAY';
+  const completedCount = Math.max(0, gameIndex);
+  const nextLabel = isRetry ? 'Retry Route' : 'Next Route';
 
   container.innerHTML = `
-    <section class="hub-panel">
-      <div class="hub-map-container">
+    <section class="hub-panel" aria-labelledby="mission-title">
+      <div class="hub-map-container" aria-hidden="true">
         <img src="maps/north-america.svg" alt="" class="hub-map-img">
+        <svg class="hub-route-line" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M20 62 C35 34, 52 28, 74 48" />
+        </svg>
         <div class="hub-pins">
-          ${pinStates.map((pos, index) => `
+          ${pinStates.slice(0, GAME_DEFINITIONS.length).map((pos, index) => `
             <div class="hub-pin ${index === gameIndex ? 'active' : (index < gameIndex ? 'completed' : '')}"
                  style="top:${pos.top};left:${pos.left};">${index + 1}</div>
           `).join('')}
         </div>
+        <div class="hub-map-caption">
+          <span>${nextLabel}</span>
+          <strong>${displayLabel(definition.key)}</strong>
+        </div>
       </div>
       <div class="mission-brief">
-        <span class="eyebrow">Level ${gameIndex + 1} of ${GAME_DEFINITIONS.length}</span>
-        <h1>${icon} ${displayLabel(definition.key)}${isRetry ? ' Remix' : ''}</h1>
+        <div class="mission-kicker">
+          <span class="eyebrow">Level ${gameIndex + 1} of ${GAME_DEFINITIONS.length}</span>
+          <span class="mission-code">${icon}</span>
+        </div>
+        <h1 id="mission-title">${displayLabel(definition.key)}${isRetry ? ' Remix' : ''}</h1>
         <p>${introCopy(definition.key)}</p>
         <div class="intro-meta">
           <span>${attemptLabel(game)}</span>
           <span>Clear at 70%</span>
+          <span>3 stars available</span>
         </div>
-        <button id="start-game" class="btn btn-primary" type="button">
-          ${isRetry ? 'Run it back' : 'Play level'}
-        </button>
+        <div class="mission-stat-grid" aria-label="Mission progress">
+          <div>
+            <small>Route</small>
+            <strong>${completedCount}/${GAME_DEFINITIONS.length} cleared</strong>
+          </div>
+          <div>
+            <small>Best</small>
+            <strong>${bestAttemptLabel(game)}</strong>
+          </div>
+          <div>
+            <small>Stars</small>
+            <strong>${game.stars || 0}/3</strong>
+          </div>
+        </div>
+        <div class="mission-action-row">
+          <button id="start-game" class="btn btn-primary mission-start" type="button">
+            ${isRetry ? 'Run it back' : (START_COPY[definition.key] || 'Play level')}
+          </button>
+          ${isDemoSession() ? renderDemoJumpControls(definition.key) : ''}
+          <span class="mission-footnote">Score each level independently. Unlimited retries.</span>
+        </div>
       </div>
     </section>
   `;
 
   container.querySelector('#start-game').addEventListener('click', () => startGame(gameIndex, isRetry));
+  bindDemoJumpControls();
 }
 
 function startGame(gameIndex, isRetry) {
@@ -170,16 +208,18 @@ async function handleGameComplete(gameIndex, result) {
     attemptNumber
   });
 
-  await submitAttemptScore({
-    agent: session.agent,
-    waveCode: session.waveCode,
-    trainerName: session.trainerName,
-    game: game.key,
-    attempt: attemptNumber,
-    scorePct: ratio,
-    stars,
-    passed
-  });
+  if (!isDemoSession()) {
+    await submitAttemptScore({
+      agent: session.agent,
+      waveCode: session.waveCode,
+      trainerName: session.trainerName,
+      game: game.key,
+      attempt: attemptNumber,
+      scorePct: ratio,
+      stars,
+      passed
+    });
+  }
 
   let newBadges = [];
   if (passed) {
@@ -207,6 +247,15 @@ async function handleGameComplete(gameIndex, result) {
 }
 
 async function showResults() {
+  if (isDemoSession()) {
+    mountResults(container, session, {
+      leaderboard: { top10: [], currentRow: null },
+      rankFlash: '',
+      justEarnedBadgeIds: session.justEarnedBadgeIds || []
+    });
+    return;
+  }
+
   const leaderboard = await fetchLeaderboard(session.agent);
   const improvedRank = Boolean(
     leaderboard.currentRow &&
@@ -309,6 +358,7 @@ function renderFailInterstitial(outcome) {
 }
 
 function awardBadgesSequentially(badges, agent) {
+  if (isDemoSession()) return;
   badges.forEach(({ id, name }, index) => {
     setTimeout(() => {
       if (isConfigured()) {
@@ -318,6 +368,45 @@ function awardBadgesSequentially(badges, agent) {
       playBadgeChime();
     }, index * 500);
   });
+}
+
+function renderDemoJumpControls(activeKey) {
+  return `
+    <div class="demo-jump-row" aria-label="Demo game shortcuts">
+      ${GAME_DEFINITIONS.map((game, index) => `
+        <button class="btn demo-jump ${game.key === activeKey ? 'active' : ''}"
+                type="button"
+                data-demo-game="${game.key}">
+          ${index + 1}. ${displayLabel(game.key)}
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function bindDemoJumpControls() {
+  if (!isDemoSession()) return;
+  container.querySelectorAll('[data-demo-game]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetIndex = GAME_DEFINITIONS.findIndex((game) => game.key === button.dataset.demoGame);
+      if (targetIndex < 0) return;
+      session.currentGameIndex = targetIndex;
+      session.completed = false;
+      saveSession(session);
+      route().catch((error) => {
+        console.error(error);
+        renderFatalState('We could not open that demo level.');
+      });
+    });
+  });
+}
+
+function isDemoSession() {
+  return session?.mode === 'demo' || Boolean(session?.demo);
+}
+
+function isDemoHydrated(currentSession) {
+  return currentSession?.mode === 'demo' || Boolean(currentSession?.demo);
 }
 
 function showBadgeToast(name) {
@@ -350,8 +439,7 @@ function introCopy(key) {
   const copy = {
     crack: 'Catch each falling location tag, type the right code, and keep your streak alive.',
     pin: 'Scan the map, hit the glowing target, and clear each drop before the timer burns out.',
-    sorter: 'Drag city cards into the right home column and combo through the board.',
-    ranger: 'One place. Seven regions. Trust your instincts and lock it in before time fades.'
+    sorter: 'Drag city cards into the right home column and combo through the board.'
   };
   return copy[key] || '';
 }
@@ -360,12 +448,17 @@ function attemptLabel(game) {
   return `Attempt ${game.attempts.length + 1}`;
 }
 
+function bestAttemptLabel(game) {
+  if (!game.attempts.length) return 'No attempts yet';
+  const bestRatio = Math.max(...game.attempts.map((attempt) => attempt.ratio || 0));
+  return `${Math.round(bestRatio * 100)}%`;
+}
+
 function displayLabel(key) {
   const labels = {
     crack: 'Code Drop',
     pin: 'Pin Rush',
-    sorter: 'City Stack',
-    ranger: 'Zone Sprint'
+    sorter: 'City Stack'
   };
   return labels[key] || key;
 }

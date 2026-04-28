@@ -1,11 +1,12 @@
+import { GAME_DEFINITIONS } from './session.js';
+
 const APPS_SCRIPT_URL = ''; // Paste your deployed Apps Script /exec URL here
 const LOCAL_LEADERBOARD_KEY = 'atlas-explorer-local-leaderboard';
 
 const GAME_SHEET_KEYS = {
   crack: 'crack-the-code',
   pin: 'pin-it',
-  sorter: 'city-sorter',
-  ranger: 'region-ranger'
+  sorter: 'city-sorter'
 };
 
 export async function submitAttemptScore({ agent, waveCode, trainerName, game, attempt, scorePct, stars, passed }) {
@@ -95,8 +96,8 @@ export function renderLeaderboard(container, rows = [], currentName = '') {
           <div class="leaderboard-row ${row.agent === currentName ? 'current' : ''}" role="row">
             <span>${row.rank || index + 1}</span>
             <span>${escapeHtml(row.agent)}</span>
-            <span>${row.totalStars}/12</span>
-            <span>${row.gamesPassed}/4</span>
+            <span>${row.totalStars}/${GAME_DEFINITIONS.length * 3}</span>
+            <span>${row.gamesPassed}/${GAME_DEFINITIONS.length}</span>
             <span>${row.badgeCount}</span>
           </div>
         `).join('')}

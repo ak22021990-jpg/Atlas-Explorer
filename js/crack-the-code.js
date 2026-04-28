@@ -41,24 +41,54 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   let activeDropId = 0;
 
   container.innerHTML = `
-    <section class="game-card arcade-card" style="display:flex;flex-direction:column;gap:16px;width:min(100%,760px);">
-      <div class="game-header">
-        <div>
-          <span class="eyebrow">${options.isRetry ? 'Retry mix' : 'Code Drop'}</span>
-          <h1 style="margin:4px 0 0;">Catch the code</h1>
+    <section class="game-card arcade-card code-drop-card">
+      <div class="code-drop-topbar">
+        <div class="code-drop-brand">
+          <span class="code-drop-compass" aria-hidden="true">AE</span>
+          <div>
+            <span class="code-drop-title">Atlas Explorer</span>
+            <span class="code-drop-sector">${options.isRetry ? 'Retry Code Drop Sector' : 'Code Drop Sector'}</span>
+          </div>
         </div>
-        <span class="game-progress" id="progress-text">1/${TOTAL_QUESTIONS}</span>
+        <div class="code-drop-hud">
+          <div>
+            <span>Score</span>
+            <strong id="code-score">0</strong>
+          </div>
+          <div class="code-drop-divider"></div>
+          <div>
+            <span>Streak</span>
+            <strong id="code-streak">0x</strong>
+          </div>
+        </div>
       </div>
-      <div id="falling-zone" style="position:relative;width:100%;height:340px;background:radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 55%), rgba(8,12,17,0.85);border:1px solid rgba(255,255,255,0.08);overflow:hidden;box-shadow:inset 0 0 30px rgba(255,255,255,0.04);border-radius:28px;">
-        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 35px,rgba(255,255,255,0.03) 36px);pointer-events:none;"></div>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),#ff9a7c);box-shadow:0 0 24px rgba(255,101,119,0.35);opacity:0.9;"></div>
+
+      <div id="falling-zone" class="code-drop-zone" style="position:relative;width:100%;height:520px;overflow:hidden;">
+        <div class="code-drop-progress">
+          <span>Level 1: Coastal Regions</span>
+          <div><i id="code-progress-bar"></i></div>
+          <strong id="progress-text">1/${TOTAL_QUESTIONS}</strong>
+        </div>
+        <span class="code-drop-ghost ghost-west">British Columbia</span>
+        <span class="code-drop-ghost ghost-east">Ontario</span>
+        <div class="code-drop-floor"></div>
+        <div class="code-drop-vanish-zone" aria-hidden="true"></div>
       </div>
-      <form id="type-form" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-        <span style="font-family:var(--display-font);font-size:0.92rem;color:var(--amz-muted);">Type the 2-letter code</span>
-        <input type="text" id="code-input" autocomplete="off" autofocus maxlength="2"
-               placeholder="_ _"
-               style="text-transform:uppercase;width:240px;text-align:center;font-family:var(--display-font);font-size:2rem;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--ink);padding:14px;letter-spacing:10px;border-radius:22px;">
+
+      <form id="type-form" class="code-drop-form">
+        <label for="code-input">Type the 2-letter code</label>
+        <div class="code-drop-actions">
+          <input type="text" id="code-input" autocomplete="off" autofocus maxlength="2"
+                 placeholder="CA"
+                 style="text-transform:uppercase;">
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
       </form>
+
+      <div class="code-drop-footer" aria-hidden="true">
+        <span>LAT: 36.7783 N, LON: 119.4179 W</span>
+        <span><i></i><i></i><i></i></span>
+      </div>
     </section>
   `;
 
@@ -66,6 +96,9 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   const input = container.querySelector('#code-input');
   const form = container.querySelector('#type-form');
   const progressText = container.querySelector('#progress-text');
+  const progressBar = container.querySelector('#code-progress-bar');
+  const scoreText = container.querySelector('#code-score');
+  const streakText = container.querySelector('#code-streak');
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -93,6 +126,7 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
     input.disabled = false;
     input.focus();
     progressText.textContent = `${currentIndex + 1}/${TOTAL_QUESTIONS}`;
+    progressBar.style.width = `${Math.round((currentIndex / TOTAL_QUESTIONS) * 100)}%`;
     const question = questions[currentIndex];
 
     const prevBlock = fallingZone.querySelector('.falling-block');
@@ -100,19 +134,12 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
 
     currentBlock = document.createElement('div');
     currentBlock.className = 'falling-block';
-    currentBlock.textContent = question.name;
+    currentBlock.innerHTML = `<span>${question.name}</span><i aria-hidden="true">drop</i>`;
     currentBlock.style.cssText = [
       'position:absolute',
       'top:-56px',
-      'width:100%',
-      'text-align:center',
-      'color:var(--geo-ink)',
-      "font-family:'Inter',sans-serif",
-      'font-size:clamp(1.4rem,2.5vw,2rem)',
-      'font-weight:700',
-      'letter-spacing:0',
-      'text-shadow:none',
-      'padding:10px 0'
+      'left:50%',
+      'transform:translateX(-50%)'
     ].join(';');
     fallingZone.appendChild(currentBlock);
 
@@ -120,8 +147,8 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
     activeDropId += 1;
     const dropId = activeDropId;
 
-    const startTop = -56;
-    const endTop = Math.max(0, fallingZone.clientHeight - 56);
+    const startTop = 132;
+    const endTop = Math.max(startTop, fallingZone.clientHeight - 24);
     currentBlock.style.top = `${startTop}px`;
 
     const animateDrop = () => {
@@ -162,6 +189,8 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
       showStreak(streak);
       const elapsed = (Date.now() - startedAt) / 1000;
       score += calculatePoints(true, elapsed, SPEED_WINDOW);
+      scoreText.textContent = score.toLocaleString();
+      streakText.textContent = `${streak}x`;
 
       const rect = currentBlock.getBoundingClientRect();
       const zoneRect = fallingZone.getBoundingClientRect();
@@ -169,8 +198,8 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
 
       currentBlock.style.transition = 'none';
       currentBlock.style.top = `${currentTop}px`;
-      currentBlock.style.color = 'var(--green)';
-      currentBlock.textContent = 'Locked in';
+      currentBlock.classList.add('locked');
+      currentBlock.innerHTML = '<span>Locked in</span><i aria-hidden="true">ok</i>';
       triggerFeedbackFlash(input, 'correct');
 
       input.disabled = true;
@@ -191,11 +220,9 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   function handleMiss() {
     stopCurrentDrop();
     streak = 0;
-    const question = questions[currentIndex];
+    streakText.textContent = '0x';
     if (currentBlock) {
-      currentBlock.style.top = `${Math.max(0, fallingZone.clientHeight - 46)}px`;
-      currentBlock.style.color = 'var(--red)';
-      currentBlock.textContent = `Missed ${question.code}`;
+      currentBlock.remove();
     }
     input.disabled = true;
     setTimeout(nextQuestion, 1000);
@@ -205,6 +232,7 @@ export async function mountCrackTheCode(container, onComplete, options = {}) {
   function nextQuestion() {
     currentIndex += 1;
     if (currentIndex >= TOTAL_QUESTIONS) {
+      progressBar.style.width = '100%';
       onComplete({ score, correctCount, totalCount: TOTAL_QUESTIONS, streakPeak, timerRatio: -1 });
       return;
     }

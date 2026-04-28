@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer - Code Drop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#c48a3b",
+                      "primary-fixed": "#d7e3f7",
+                      "tertiary": "#271500",
+                      "surface-tint": "#535f70",
+                      "on-error-container": "#93000a",
+                      "tertiary-container": "#432800",
+                      "on-primary-container": "#8a97a9",
+                      "inverse-surface": "#303031",
+                      "surface-bright": "#fbf9fa",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#ffdcbd",
+                      "on-surface": "#1b1b1d",
+                      "surface-container-highest": "#e4e2e3",
+                      "surface-dim": "#dcd9db",
+                      "on-background": "#1b1b1d",
+                      "on-primary-fixed-variant": "#3c4858",
+                      "inverse-primary": "#bbc7db",
+                      "primary-container": "#232f3e",
+                      "on-secondary": "#ffffff",
+                      "background": "#fbf9fa",
+                      "on-primary-fixed": "#101c2b",
+                      "surface-container-low": "#f5f3f4",
+                      "surface-container": "#f0edee",
+                      "secondary-container": "#fe9800",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#693c00",
+                      "surface": "#fbf9fa",
+                      "tertiary-fixed": "#ffddb7",
+                      "outline-variant": "#c5c6cc",
+                      "on-surface-variant": "#44474c",
+                      "on-secondary-fixed": "#2c1600",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "secondary-fixed-dim": "#ffb86f",
+                      "on-secondary-container": "#643900",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#eae7e9",
+                      "tertiary-fixed-dim": "#fbba67",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#f3f0f1",
+                      "primary-fixed-dim": "#bbc7db",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e4e2e3",
+                      "outline": "#75777c",
+                      "on-tertiary-fixed": "#2a1700",
+                      "primary": "#0e1a28",
+                      "secondary": "#8a5100"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin": "48px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "h2-headline": [
+                              "Inter"
+                      ],
+                      "h3-subheading": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "h1-display": [
+                              "Inter"
+                      ],
+                      "label-numeric": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "h2-headline": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "h3-subheading": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h1-display": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-numeric": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-[#F5F0E8] text-on-surface min-h-screen flex flex-col items-center justify-center p-gutter relative overflow-hidden font-body-md">
+<!-- Topographic Background Overlay -->
+<div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 20% 30%, #2D3B2F 1px, transparent 1px), radial-gradient(circle at 80% 70%, #2D3B2F 1px, transparent 1px); background-size: 24px 24px;"></div>
+<main class="w-full max-w-2xl relative z-10 flex flex-col gap-gutter">
+<!-- Level Header -->
+<header class="flex justify-between items-end border-b border-[#2D3B2F]/15 pb-4">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Atlas Explorer</span>
+<h1 class="font-h1-display text-h1-display text-on-surface">Code Drop</h1>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Level</span>
+<div class="font-label-numeric text-label-numeric text-on-surface bg-surface-container-high px-3 py-1 rounded-DEFAULT border border-[#2D3B2F]/15">1 / 4</div>
+</div>
+</header>
+<!-- Brief Panel -->
+<section class="bg-[#F5F0E8] rounded-xl border border-[#2D3B2F]/15 p-gutter shadow-[0px_2px_4px_rgba(45,59,47,0.1)] relative overflow-hidden">
+<!-- Map Texture Background -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none" style="background-image: linear-gradient(45deg, #2D3B2F 25%, transparent 25%, transparent 75%, #2D3B2F 75%, #2D3B2F), linear-gradient(45deg, #2D3B2F 25%, transparent 25%, transparent 75%, #2D3B2F 75%, #2D3B2F); background-size: 10px 10px; background-position: 0 0, 5px 5px;"></div>
+<div class="relative z-10 flex flex-col gap-6">
+<div class="flex items-start gap-4">
+<div class="bg-surface-container-highest p-3 rounded-full border border-[#2D3B2F]/15 flex items-center justify-center">
+<span class="material-symbols-outlined text-outline" style="font-variation-settings: 'FILL' 0;">flight_takeoff</span>
+</div>
+<div>
+<h2 class="font-h3-subheading text-h3-subheading text-on-surface mb-2">Mission Brief</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Type the 2-letter state or province code as they fall. Keep your streak alive to earn maximum stars!</p>
+</div>
+</div>
+<div class="border-t border-dotted border-[#2D3B2F]/30 pt-4 flex justify-between items-center">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Attempt</span>
+<div class="font-label-numeric text-label-numeric text-on-surface mt-1">1</div>
+</div>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Area -->
+<div class="flex justify-center mt-4">
+<button class="bg-[#008080] text-on-primary font-h3-subheading text-h3-subheading py-4 px-12 rounded-DEFAULT shadow-[0px_2px_4px_rgba(45,59,47,0.2)] hover:-translate-y-0.5 active:translate-y-0.5 transition-transform flex items-center gap-3">
+<span>Begin Descent</span>
+<span class="material-symbols-outlined">south</span>
+</button>
+</div>
+</main>
+</body></html>

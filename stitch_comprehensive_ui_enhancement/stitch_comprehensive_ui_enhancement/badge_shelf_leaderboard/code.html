@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Explorer - Rankings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#c48a3b",
+                        "primary-fixed": "#d7e3f7",
+                        "tertiary": "#271500",
+                        "surface-tint": "#535f70",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#432800",
+                        "on-primary-container": "#8a97a9",
+                        "inverse-surface": "#303031",
+                        "surface-bright": "#fbf9fa",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdcbd",
+                        "on-surface": "#1b1b1d",
+                        "surface-container-highest": "#e4e2e3",
+                        "surface-dim": "#dcd9db",
+                        "on-background": "#1b1b1d",
+                        "on-primary-fixed-variant": "#3c4858",
+                        "inverse-primary": "#bbc7db",
+                        "primary-container": "#232f3e",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9fa",
+                        "on-primary-fixed": "#101c2b",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-container": "#f0edee",
+                        "secondary-container": "#fe9800",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#693c00",
+                        "surface": "#fbf9fa",
+                        "tertiary-fixed": "#ffddb7",
+                        "outline-variant": "#c5c6cc",
+                        "on-surface-variant": "#44474c",
+                        "on-secondary-fixed": "#2c1600",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "secondary-fixed-dim": "#ffb86f",
+                        "on-secondary-container": "#643900",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#eae7e9",
+                        "tertiary-fixed-dim": "#fbba67",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f3f0f1",
+                        "primary-fixed-dim": "#bbc7db",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e4e2e3",
+                        "outline": "#75777c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary": "#0e1a28",
+                        "secondary": "#8a5100"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "48px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2-headline": ["Inter"],
+                        "h3-subheading": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1-display": ["Inter"],
+                        "label-numeric": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "h2-headline": ["32px", { "lineHeight": "1.2", "fontWeight": "800" }],
+                        "h3-subheading": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1-display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-numeric": ["14px", { "lineHeight": "1", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .topographic-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .paper-texture {
+            background-color: #F5F0E8;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-primary min-h-screen text-on-surface antialiased flex flex-col font-body-md text-body-md">
+<!-- TopAppBar -->
+<header class="bg-slate-900 dark:bg-black font-inter tracking-tight uppercase font-semibold docked full-width top-0 border-b border-white/10 shadow-sm flex justify-between items-center px-6 py-3 w-full sticky z-50 hidden md:flex">
+<div class="text-lg font-black tracking-widest text-white">
+            Atlas Explorer
+        </div>
+<nav class="flex gap-8">
+<a class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150" href="#">Map</a>
+<a class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150" href="#">Archive</a>
+<a class="text-amber-500 border-b-2 border-amber-500 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150 py-2" href="#">Rankings</a>
+<a class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150" href="#">Profile</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="text-amber-500 dark:text-amber-400">Stats: 1,250</span>
+<button class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<button class="text-slate-400 hover:text-amber-300 transition-colors scale-95 active:scale-90 duration-150">
+<span class="material-symbols-outlined">military_tech</span>
+</button>
+</div>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-6 md:px-margin py-8 md:py-12 pb-32 md:pb-12 space-y-gutter relative topographic-pattern">
+<!-- Header Section -->
+<div class="mb-12">
+<h1 class="font-h1-display text-h1-display text-white mb-2">Rankings &amp; Achievements</h1>
+<p class="font-body-lg text-body-lg text-inverse-primary max-w-2xl">Compare your exploration metrics against the global community and review your earned expedition badges.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Badge Shelf Panel -->
+<div class="lg:col-span-4 space-y-6">
+<div class="paper-texture rounded-xl border border-primary/10 shadow-sm p-6 text-primary h-full">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-primary/10">
+<h2 class="font-h3-subheading text-h3-subheading text-primary">Your Achievements</h2>
+<span class="material-symbols-outlined text-secondary-container text-2xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Badge 1 -->
+<div class="bg-white/50 rounded-lg p-4 border border-primary/5 flex flex-col items-center text-center shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="w-16 h-16 rounded-full bg-secondary-fixed/30 flex items-center justify-center mb-3 border-2 border-secondary-container">
+<span class="material-symbols-outlined text-secondary-container text-3xl" style="font-variation-settings: 'FILL' 1;">landscape</span>
+</div>
+<h4 class="font-label-numeric text-label-numeric text-primary mb-1">Alpine Ascender</h4>
+<p class="font-label-caps text-[10px] text-surface-tint">Level 4</p>
+</div>
+<!-- Badge 2 -->
+<div class="bg-white/50 rounded-lg p-4 border border-primary/5 flex flex-col items-center text-center shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="w-16 h-16 rounded-full bg-secondary-fixed/30 flex items-center justify-center mb-3 border-2 border-secondary-container">
+<span class="material-symbols-outlined text-secondary-container text-3xl" style="font-variation-settings: 'FILL' 1;">sailing</span>
+</div>
+<h4 class="font-label-numeric text-label-numeric text-primary mb-1">Coastal Navigator</h4>
+<p class="font-label-caps text-[10px] text-surface-tint">Level 2</p>
+</div>
+<!-- Badge 3 -->
+<div class="bg-white/50 rounded-lg p-4 border border-primary/5 flex flex-col items-center text-center shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="w-16 h-16 rounded-full bg-surface-dim/30 flex items-center justify-center mb-3 border-2 border-outline-variant opacity-70 grayscale">
+<span class="material-symbols-outlined text-surface-tint text-3xl">local_fire_department</span>
+</div>
+<h4 class="font-label-numeric text-label-numeric text-surface-tint mb-1">Desert Nomad</h4>
+<p class="font-label-caps text-[10px] text-surface-tint">Locked</p>
+</div>
+<!-- Badge 4 -->
+<div class="bg-white/50 rounded-lg p-4 border border-primary/5 flex flex-col items-center text-center shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="w-16 h-16 rounded-full bg-surface-dim/30 flex items-center justify-center mb-3 border-2 border-outline-variant opacity-70 grayscale">
+<span class="material-symbols-outlined text-surface-tint text-3xl">ac_unit</span>
+</div>
+<h4 class="font-label-numeric text-label-numeric text-surface-tint mb-1">Tundra Trekker</h4>
+<p class="font-label-caps text-[10px] text-surface-tint">Locked</p>
+</div>
+</div>
+<button class="w-full mt-6 py-3 border border-primary/20 rounded-lg font-label-caps text-label-caps text-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
+                        View Full Archive
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Leaderboard Table Panel -->
+<div class="lg:col-span-8">
+<div class="bg-surface-container rounded-xl border border-white/5 shadow-lg overflow-hidden h-full flex flex-col">
+<div class="p-6 bg-surface-container-high border-b border-surface-dim flex justify-between items-end">
+<div>
+<h2 class="font-h3-subheading text-h3-subheading text-on-surface mb-1">Global Leaderboard</h2>
+<p class="font-body-md text-body-md text-surface-tint">Season 14 - Top Explorers</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-primary/10 text-primary font-label-caps text-label-caps px-3 py-1 rounded-full border border-primary/20">Global</span>
+<span class="bg-transparent text-surface-tint font-label-caps text-label-caps px-3 py-1 rounded-full hover:bg-black/5 cursor-pointer">Regional</span>
+</div>
+</div>
+<div class="flex-grow overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b-2 border-surface-dim">
+<th class="py-4 px-6 font-label-caps text-label-caps text-surface-tint w-16 text-center">Rank</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-surface-tint">Explorer</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-surface-tint text-right">Distance (km)</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-surface-tint text-right">Discoveries</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-surface-tint text-right">Score</th>
+</tr>
+</thead>
+<tbody class="font-label-numeric text-label-numeric">
+<tr class="border-b border-surface-dim/50 hover:bg-black/5 transition-colors">
+<td class="py-4 px-6 text-center text-on-surface">1</td>
+<td class="py-4 px-6 text-on-surface flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary font-bold text-xs">EL</div>
+                                        ElenaRostov
+                                    </td>
+<td class="py-4 px-6 text-right text-surface-tint">14,205</td>
+<td class="py-4 px-6 text-right text-surface-tint">342</td>
+<td class="py-4 px-6 text-right text-on-surface font-bold">94,200</td>
+</tr>
+<tr class="border-b border-surface-dim/50 hover:bg-black/5 transition-colors">
+<td class="py-4 px-6 text-center text-on-surface">2</td>
+<td class="py-4 px-6 text-on-surface flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">MK</div>
+                                        MarcoPolo_99
+                                    </td>
+<td class="py-4 px-6 text-right text-surface-tint">13,850</td>
+<td class="py-4 px-6 text-right text-surface-tint">310</td>
+<td class="py-4 px-6 text-right text-on-surface font-bold">89,150</td>
+</tr>
+<tr class="border-b border-surface-dim/50 hover:bg-black/5 transition-colors">
+<td class="py-4 px-6 text-center text-on-surface">3</td>
+<td class="py-4 px-6 text-on-surface flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary font-bold text-xs">JW</div>
+                                        J_Wayfinder
+                                    </td>
+<td class="py-4 px-6 text-right text-surface-tint">12,100</td>
+<td class="py-4 px-6 text-right text-surface-tint">285</td>
+<td class="py-4 px-6 text-right text-on-surface font-bold">82,400</td>
+</tr>
+<!-- Separation dots -->
+<tr>
+<td class="py-2 text-center text-surface-tint tracking-[0.5em] opacity-50" colspan="5">.......</td>
+</tr>
+<!-- Current User Row -->
+<tr class="bg-secondary-fixed/10 border-l-4 border-l-secondary-container border-y border-y-secondary-container/30 shadow-[0_2px_10px_rgba(254,152,0,0.1)] relative z-10">
+<td class="py-4 px-6 text-center text-secondary-container font-bold">42</td>
+<td class="py-4 px-6 text-on-surface flex items-center gap-3 font-bold">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-white text-xs">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+                                        You (Explorer_84)
+                                    </td>
+<td class="py-4 px-6 text-right text-on-surface">8,450</td>
+<td class="py-4 px-6 text-right text-on-surface">156</td>
+<td class="py-4 px-6 text-right text-secondary-container font-bold">45,900</td>
+</tr>
+<!-- Separation dots -->
+<tr>
+<td class="py-2 text-center text-surface-tint tracking-[0.5em] opacity-50" colspan="5">.......</td>
+</tr>
+<tr class="border-b border-surface-dim/50 hover:bg-black/5 transition-colors">
+<td class="py-4 px-6 text-center text-on-surface">43</td>
+<td class="py-4 px-6 text-on-surface flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-dim flex items-center justify-center text-surface-tint font-bold text-xs">SN</div>
+                                        S_Nomad
+                                    </td>
+<td class="py-4 px-6 text-right text-surface-tint">8,410</td>
+<td class="py-4 px-6 text-right text-surface-tint">152</td>
+<td class="py-4 px-6 text-right text-on-surface font-bold">45,100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar for Mobile -->
+<nav class="bg-slate-900 dark:bg-black font-inter text-[10px] font-bold uppercase docked full-width bottom-0 rounded-t-lg border-t border-white/10 shadow-lg fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">map</span>
+            Map
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+            Archive
+        </a>
+<a class="flex flex-col items-center justify-center text-orange-500 bg-white/5 rounded-lg p-2 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+            Rankings
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-white/10 hover:text-white transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+            Profile
+        </a>
+</nav>
+</body></html>

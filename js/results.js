@@ -15,9 +15,20 @@ export function mountResults(container, session, options = {}) {
   const allPassed = isAllPassed(session);
   const total = getTotalScore(session);
   const stars = getTotalStars(session);
+  const maxStars = GAME_DEFINITIONS.length * 3;
 
   container.innerHTML = `
     <section class="results-panel">
+      <header class="mission-report-header">
+        <span class="eyebrow">Mission report</span>
+        <h1>${allPassed ? 'Expedition complete' : 'Expedition in progress'}</h1>
+        <p>
+          ${escapeHtml(session.agent || session.name)} &middot;
+          Wave ${escapeHtml(session.waveCode || 'Unassigned')} &middot;
+          ${stars}/${maxStars} stars collected
+        </p>
+      </header>
+
       <div class="result-status ${allPassed ? 'pass' : 'fail'}">
         <span>${allPassed ? 'Full run complete' : 'Your run is still live'}</span>
         <strong>${allPassed ? 'RUN COMPLETE' : 'KEEP GOING'}</strong>
@@ -28,7 +39,7 @@ export function mountResults(container, session, options = {}) {
         <div>
           <p>Total Score</p>
           <strong class="metric" data-count-target="${total}">0</strong>
-          <span>Across all four levels</span>
+          <span>Across all ${GAME_DEFINITIONS.length} levels</span>
         </div>
         <div>
           <p>Stars</p>
@@ -44,7 +55,7 @@ export function mountResults(container, session, options = {}) {
 
       <div class="section-heading">
         <h2>Level Breakdown</h2>
-        <span>${stars}/12 stars banked</span>
+        <span>${stars}/${maxStars} stars banked</span>
       </div>
       <div class="results-grid">
         ${session.games.map((game, index) => `
@@ -148,9 +159,9 @@ function badgeDescription(id) {
     'first-blood': 'Pass on the first try',
     'perfect-agent': 'Score 100% in any level',
     'hot-streak': 'Chain 3 correct answers',
-    'globe-trotter': 'Pass all 4 games',
-    'diamond-agent': 'Pass all 4 on the first try',
-    'star-collector': 'Collect all 12 stars',
+    'globe-trotter': `Pass all ${GAME_DEFINITIONS.length} games`,
+    'diamond-agent': `Pass all ${GAME_DEFINITIONS.length} on the first try`,
+    'star-collector': `Collect all ${GAME_DEFINITIONS.length * 3} stars`,
     'never-quit': 'Pass after 3 failed tries',
     'speed-run': 'Perfect timed finish'
   };
@@ -161,8 +172,7 @@ function displayLabel(key) {
   const labels = {
     crack: 'Code Drop',
     pin: 'Pin Rush',
-    sorter: 'City Stack',
-    ranger: 'Zone Sprint'
+    sorter: 'City Stack'
   };
   return labels[key] || key;
 }
@@ -183,7 +193,7 @@ p{font-size:16px;line-height:1.6;color:#d3d9df}
 <h1>Atlas Explorer</h1>
 <h2>Certificate of Completion</h2>
 <p>This certifies that <strong>${escapeHtml(session.agent || session.name)}</strong> completed the Atlas Explorer game run — iCube Wave Code: <strong>${escapeHtml(session.waveCode || '')}</strong>, Trainer: <strong>${escapeHtml(session.trainerName || '')}</strong>.</p>
-<p>Total Score: <strong>${getTotalScore(session)}</strong><br>Stars Earned: <strong>${getTotalStars(session)}/12</strong><br>Date: <strong>${new Date().toLocaleDateString()}</strong></p>
+<p>Total Score: <strong>${getTotalScore(session)}</strong><br>Stars Earned: <strong>${getTotalStars(session)}/${GAME_DEFINITIONS.length * 3}</strong><br>Date: <strong>${new Date().toLocaleDateString()}</strong></p>
 <div class="stamp">Run complete</div>
 </section></body></html>`;
   const blob = new Blob([html], { type: 'text/html' });

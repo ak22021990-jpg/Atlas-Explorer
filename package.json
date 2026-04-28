@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node tests/test-scoring.js && node tests/test-session.js && node tests/test-crack-the-code.js && node tests/test-pin-it.js && node tests/test-city-sorter.js && node tests/test-region-ranger.js && node tests/test-badges.js && node tests/test-leaderboard.js && node tests/test-flow-ui.js && node tests/test-results.js"
+    "test": "node tests/test-scoring.js && node tests/test-session.js && node tests/test-crack-the-code.js && node tests/test-pin-it.js && node tests/test-city-sorter.js && node tests/test-badges.js && node tests/test-leaderboard.js && node tests/test-flow-ui.js && node tests/test-results.js"
   },
   "devDependencies": {
     "playwright": "^1.59.1"
