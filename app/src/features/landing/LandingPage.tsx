@@ -214,9 +214,7 @@ export default function LandingPage() {
   return (
     <AppLayout>
       <main 
-        onClick={dismissParticles} 
-        onKeyDown={dismissParticles} 
-        onFocus={dismissParticles} 
+        onClick={dismissParticles}
         className="flex flex-col lg:flex-row h-screen w-screen overflow-hidden bg-atlas-warm relative font-sans text-atlas-ink"
       >
         
@@ -394,6 +392,13 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-atlas-accent/[0.03] via-transparent to-atlas-gold/[0.03]" />
             <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `url("${publicAsset('/assets/patterns/dots-pattern.png')}")`, backgroundSize: '120px' }} />
             <div className="absolute top-[30%] left-[20%] w-96 h-96 bg-atlas-accent/5 rounded-full blur-3xl" />
+            <img
+              src={publicAsset('/maps/north-america.svg')}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-contain opacity-[0.07] select-none"
+              style={{ filter: 'grayscale(0.4) sepia(0.15)' }}
+            />
           </div>
 
           <div className="relative z-10 h-full flex flex-col items-center justify-center">
