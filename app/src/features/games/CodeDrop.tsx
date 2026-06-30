@@ -292,6 +292,7 @@ export default function CodeDrop({ onComplete, onStreakChange, isRetry }: GamePr
     if (locked || !questions.length) return;
     const q = questions[qi];
     if (q.type !== 'timezone') return;
+    setLocked(true);
     playSound('click');
 
     if (checkTimezoneAnswer(q.state.timezone, choice as Parameters<typeof checkTimezoneAnswer>[0])) {
@@ -300,7 +301,6 @@ export default function CodeDrop({ onComplete, onStreakChange, isRetry }: GamePr
       playSound('wrong');
       mistakesRef.current.add(q.state.code);
       setWrongFlash(true);
-      setLocked(true);
       setTimeout(() => {
         setWrongFlash(false);
         advanceQuestion();
@@ -402,7 +402,6 @@ export default function CodeDrop({ onComplete, onStreakChange, isRetry }: GamePr
             className="h-full bg-gradient-to-r from-[#06B6D4] to-[#22C55E] transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.4)] relative"
             style={{ width: `${progress}%` }}
           >
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
           </div>
         </div>
       </div>
@@ -521,7 +520,7 @@ export default function CodeDrop({ onComplete, onStreakChange, isRetry }: GamePr
             <div className="text-[9px] font-black text-white/30 uppercase tracking-widest text-center">Sector Sync Protocol</div>
 
             {/* Timezone Map Legend */}
-            <div className="flex flex-wrap justify-center gap-2 px-2 py-2 rounded-2xl bg-white/[0.03] border border-white/5">
+            <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 px-2 py-2 rounded-2xl bg-white/[0.03] border border-white/5 max-w-full overflow-x-auto">
               {[
                 { tz: 'EST', color: '#A684C7' },
                 { tz: 'CST', color: '#4FAA76' },
