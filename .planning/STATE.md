@@ -81,6 +81,7 @@ None.
 | Date | Task | Commit | Status |
 |------|------|--------|--------|
 | 2026-05-21 | Fix tz-sorter (Timezone Sort) blank screen — restore missing useParticles/AnimatedCard imports | 7198353 | complete ✓ |
+| 2026-06-19 | Fix Vite `@/` import resolution — remove stray `vite.config.js` shadowing `vite.config.ts` | — | complete ✓ |
 
 ## Deferred Items
 

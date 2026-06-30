@@ -12,6 +12,7 @@ const COLOR_WRONG = 'var(--atlas-error)';
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 5;
 const DRAG_THRESHOLD = 5;
+const EMPTY_CODES: string[] = [];
 
 function publicAsset(path: string) {
   return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
@@ -110,7 +111,7 @@ export default function InteractiveMap({
   miniMap = false,
   explorationOrder = [],
   masteredCodes = [],
-  pulsingClusterCodes = [],
+  pulsingClusterCodes = EMPTY_CODES,
 }: InteractiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -198,7 +199,10 @@ export default function InteractiveMap({
       const code = el.getAttribute('data-code') || el.getAttribute('id') || '';
 
       // Exclude DC from interaction tracking — DC is in SVG (64 paths) but not in states.json (63 entries)
-      if (code === 'DC') return;
+      if (code === 'DC') {
+        el.style.pointerEvents = 'none';
+        return;
+      }
 
       if (code.startsWith('US-')) {
         el.classList.add('atlas-region-us');
@@ -248,68 +252,62 @@ export default function InteractiveMap({
     return () => cleanups.forEach(fn => fn());
   }, [svgContent]);
 
-  // Effect B — Visual state update (batched via requestAnimationFrame)
+  // Effect B — Visual state update (synchronous to avoid rAF cancellation on rapid dep changes)
   useEffect(() => {
     if (!svgContent || !contentRef.current) return;
-    const frameId = requestAnimationFrame(() => {
-      if (!contentRef.current) return;
 
     contentRef.current.querySelectorAll('.atlas-region').forEach((el) => {
-        if (!(el instanceof SVGPathElement)) return;
-        const code = el.getAttribute('data-code') || el.getAttribute('id') || '';
-        const tz = timezoneMap[code];
-        
-        // Build desired class set for this region
-        const desiredClasses = new Set<string>();
+      if (!(el instanceof SVGPathElement)) return;
+      const code = el.getAttribute('data-code') || el.getAttribute('id') || '';
+      const tz = timezoneMap[code];
 
-        if (heatmapMap && heatmapMap[code]) {
-          el.style.fill = heatmapMap[code];
-          desiredClasses.add('is-heatmap');
-        } else if (code === correctCode) {
-          el.style.fill = COLOR_CORRECT;
-          desiredClasses.add('is-correct');
-        } else if (code === wrongCode) {
-          el.style.fill = COLOR_WRONG;
-          desiredClasses.add('is-wrong');
-        } else if (code === activeCode) {
-          el.style.fill = COLOR_ACTIVE;
-          desiredClasses.add('is-active');
-        } else if (pulsingClusterCodes.includes(code)) {
-          el.style.fill = COLOR_ACTIVE;
-          desiredClasses.add('is-cluster-pulse');
-        } else if (masteredCodes.includes(code)) {
-          el.style.fill = tz ? (TZ_FILLS[tz] ?? COLOR_EXPLORED) : COLOR_EXPLORED;
-          desiredClasses.add('is-mastered');
-        } else if (highlightedCodes.includes(code)) {
-          el.style.fill = tz ? (TZ_FILLS[tz] ?? COLOR_EXPLORED) : COLOR_EXPLORED;
-          desiredClasses.add('is-highlighted');
+      const desiredClasses = new Set<string>();
+
+      if (heatmapMap && heatmapMap[code]) {
+        el.style.fill = heatmapMap[code];
+        desiredClasses.add('is-heatmap');
+      } else if (code === correctCode) {
+        el.style.fill = COLOR_CORRECT;
+        desiredClasses.add('is-correct');
+      } else if (code === wrongCode) {
+        el.style.fill = COLOR_WRONG;
+        desiredClasses.add('is-wrong');
+      } else if (code === activeCode && mode !== 'explore') {
+        el.style.fill = COLOR_ACTIVE;
+        desiredClasses.add('is-active');
+      } else if (pulsingClusterCodes.includes(code)) {
+        el.style.fill = COLOR_ACTIVE;
+        desiredClasses.add('is-cluster-pulse');
+      } else if (masteredCodes.includes(code)) {
+        el.style.fill = tz ? (TZ_FILLS[tz] ?? COLOR_EXPLORED) : COLOR_EXPLORED;
+        desiredClasses.add('is-mastered');
+        if (code === activeCode) desiredClasses.add('is-explore-active');
+      } else if (highlightedCodes.includes(code)) {
+        el.style.fill = tz ? (TZ_FILLS[tz] ?? COLOR_EXPLORED) : COLOR_EXPLORED;
+        desiredClasses.add('is-highlighted');
+      } else {
+        el.style.fill = defaultFill;
+      }
+
+      if (hoveredTimezone) {
+        if (tz === hoveredTimezone) {
+          desiredClasses.add('is-tz-hover');
         } else {
-          el.style.fill = defaultFill;
+          desiredClasses.add('is-dimmed');
         }
+      }
 
-        if (hoveredTimezone) {
-          if (tz === hoveredTimezone) {
-            desiredClasses.add('is-tz-hover');
-          } else {
-            desiredClasses.add('is-dimmed');
-          }
-        }
+      const prevClasses = prevClassStateRef.current.get(el) || new Set<string>();
+      for (const cls of prevClasses) {
+        if (!desiredClasses.has(cls)) el.classList.remove(cls);
+      }
+      for (const cls of desiredClasses) {
+        if (!prevClasses.has(cls)) el.classList.add(cls);
+      }
+      prevClassStateRef.current.set(el, desiredClasses);
 
-        // Diff-based classList update — only toggle what changed
-        const prevClasses = prevClassStateRef.current.get(el) || new Set<string>();
-        for (const cls of prevClasses) {
-          if (!desiredClasses.has(cls)) el.classList.remove(cls);
-        }
-        for (const cls of desiredClasses) {
-          if (!prevClasses.has(cls)) el.classList.add(cls);
-        }
-        prevClassStateRef.current.set(el, desiredClasses);
-
-        el.style.cursor = mode === 'gameplay' && !correctCode && !wrongCode ? 'crosshair' : 'pointer';
-      });
+      el.style.cursor = mode === 'gameplay' && !correctCode && !wrongCode ? 'crosshair' : 'pointer';
     });
-
-    return () => cancelAnimationFrame(frameId);
   }, [svgContent, highlightedCodes, masteredCodes, pulsingClusterCodes, activeCode, correctCode, wrongCode, mode, timezoneMap, hoveredTimezone, defaultFill, heatmapMap]);
 
   useEffect(() => {
@@ -509,7 +507,7 @@ export default function InteractiveMap({
         className={[
           'absolute inset-0 origin-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block',
 
-          '[&_.is-highlighted]:scale-[1.01]',
+          '',
         ].join(' ')}
         dangerouslySetInnerHTML={{ __html: svgContent ?? '' }}
       />
@@ -545,19 +543,16 @@ export default function InteractiveMap({
           filter: brightness(1.5) saturate(1.3);
           stroke: #fff !important;
           stroke-width: 2px !important;
-          transform: scale(1.02);
         }
         .is-tz-hover {
           filter: brightness(1.8) saturate(1.5);
           stroke-width: 3px !important;
-          transform: scale(1.04);
         }
         .is-dimmed {
           opacity: 0.25;
           filter: grayscale(0.8) contrast(0.8);
         }
         .atlas-region:active {
-          transform: scale(0.98);
           filter: brightness(0.8);
         }
         .is-highlighted {
@@ -584,6 +579,11 @@ export default function InteractiveMap({
         .is-active, .is-correct, .is-wrong {
           transition: all 0.3s ease;
         }
+        .is-explore-active {
+          stroke: white !important;
+          stroke-width: 3px !important;
+          filter: brightness(1.2);
+        }
         @media (prefers-reduced-motion: reduce) {
           .is-cluster-pulse {
             animation: none !important;
@@ -592,7 +592,7 @@ export default function InteractiveMap({
       `}</style>
 
       {!miniMap && (
-        <div className="absolute bottom-3 right-3 z-20 flex overflow-hidden rounded-xl border border-atlas-border bg-atlas-card/80 shadow-xl backdrop-blur-md font-display">
+        <div className="absolute bottom-3 right-3 z-[60] flex overflow-hidden rounded-xl border border-atlas-border bg-atlas-card/80 shadow-xl backdrop-blur-md font-display">
           <button
             type="button"
             onPointerDown={(e) => e.stopPropagation()}

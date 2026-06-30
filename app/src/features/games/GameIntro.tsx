@@ -141,8 +141,8 @@ export default function GameIntro({ gameIndex, game, clearedCount, totalGames, o
           </div>
         </div>
 
-        {/* Map Legend */}
-        <div className="absolute top-8 left-8 flex flex-col gap-3 z-20 font-display">
+        {/* Map Legend — kept inside map panel bounds */}
+        <div className="absolute top-4 left-4 max-w-[calc(100%-2rem)] flex flex-col gap-2 sm:gap-3 z-20 font-display pointer-events-none">
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-atlas-accent shadow-[0_0_10px_rgba(46,125,50,0.3)]" />
             <span className="text-atlas-muted text-xs uppercase font-black tracking-widest">Completed Region</span>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameProps } from '@/types';
 import InteractiveMap from '@/components/map/InteractiveMap';
 import { useParticles } from '@/components/ui/ParticleSystem';
@@ -25,8 +25,6 @@ import Typewriter from '@/components/ui/Typewriter';
 import { gameEvents } from '@/hooks/useGameEvents';
 import StateOutline from '@/components/map/StateOutline';
 
-// ─── Timezone badge colours ───────────────────────────────────────────────────
-
 const TZ_BG: Record<string, string> = {
   PST: '#3B82F6',
   MST: '#F97316',
@@ -37,6 +35,8 @@ const TZ_BG: Record<string, string> = {
   AST: '#14B8A6',
   NST: '#EF4444',
 };
+
+const EMPTY_HIGHLIGHT: string[] = [];
 
 function tzBg(tz: string) {
   return TZ_BG[tz] ?? '#6B7280';
@@ -64,6 +64,11 @@ export default function PinRush({ onComplete, onStreakChange, isRetry }: GamePro
   const [correctCode, setCorrectCode] = useState<string | null>(null);
   const [wrongCode, setWrongCode] = useState<string | null>(null);
   const [showStamp, setShowStamp] = useState<'CONFIRMED' | 'MISSED' | null>(null);
+
+  const highlightedCodes = useMemo(
+    () => (correctCode ? [correctCode] : EMPTY_HIGHLIGHT),
+    [correctCode],
+  );
 
   // ── Refs ──────────────────────────────────────────────────────────────────
   const startedAtRef = useRef(0);
@@ -398,7 +403,7 @@ export default function PinRush({ onComplete, onStreakChange, isRetry }: GamePro
         >
           <InteractiveMap
             onRegionClick={locked ? () => { } : onRegionClick}
-            highlightedCodes={correctCode ? [correctCode] : []}
+            highlightedCodes={highlightedCodes}
             activeCode={wrongCode}
             correctCode={correctCode}
             wrongCode={wrongCode}
