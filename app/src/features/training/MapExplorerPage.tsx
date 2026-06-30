@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Compass, Map, MapPin, Trophy, X } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
@@ -11,6 +12,7 @@ import StateInfoPanel from '@/components/map/StateInfoPanel';
 import TrainingTopBar from '@/components/layout/TrainingTopBar';
 import { triggerClusterComplete, triggerMilestoneCeremony } from '@/lib/celebrations';
 import { TOTAL_REGIONS } from '@/lib/session';
+import { TZ_FILLS } from '@/lib/timezones';
 
 const PIN_POSITIONS = [
   { top: '25%', left: '30%' },
@@ -40,6 +42,8 @@ const CLUSTER_CHECKPOINTS: Record<string, string[]> = {
   'Northeast Corridor': ['MD', 'DE', 'PA', 'NJ', 'NY', 'CT', 'RI', 'MA', 'VT', 'NH', 'ME']
 };
 
+const EMPTY_CLUSTER_CODES: string[] = [];
+
 type RegionFlight = RegionFlightSource & {
   id: number;
   dx: number;
@@ -50,14 +54,6 @@ type RegionFlight = RegionFlightSource & {
 
 const PANEL_WIDTH = 340;
 const FLIGHT_DURATION_MS = 300;
-
-function hashString(input: string): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
 
 export default function MapExplorerPage() {
   const { session, updateTraining, saveJournalEntry } = useSession();
@@ -72,6 +68,9 @@ export default function MapExplorerPage() {
   const [showLegend, setShowLegend] = useState(() => {
     return localStorage.getItem('atlas_showLegend') === 'true';
   });
+  const [selectedTimezone, setSelectedTimezone] = useState<string | null>(() =>
+    localStorage.getItem('atlas_selectedTimezone') || null
+  );
   const [milestonePopup, setMilestonePopup] = useState<{ count: number; label: string; icon: string } | null>(null);
   const [completedCluster, setCompletedCluster] = useState<string | null>(null);
   const [hoveredRegion, setHoveredRegion] = useState<{ code: string; pos: { x: number; y: number } } | null>(null);
@@ -114,7 +113,7 @@ export default function MapExplorerPage() {
 
   function dismissTour() {
     setTourStep(-1);
-    localStorage.setItem('atlas_seen', 'true');
+    localStorage.setItem('atlas_tour_seen', 'true');
   }
 
   const clicked = useMemo(() => session?.training?.mapExplorerClicked || [], [session]);
@@ -132,45 +131,11 @@ export default function MapExplorerPage() {
     return timezoneMap[hoveredRegion.code] || null;
   }, [hoveredRegion, timezoneMap]);
 
-  // Statistics calculations
-  const { byCountry, byTimezone, byCoast } = useMemo(() => {
-    const byCountry = [
-      { label: 'United States', count: states.filter(s => clicked.includes(s.code)).length, total: states.length },
-    ];
+  const pulsingClusterCodes = useMemo(
+    () => (completedCluster ? (CLUSTER_CHECKPOINTS[completedCluster] ?? EMPTY_CLUSTER_CODES) : EMPTY_CLUSTER_CODES),
+    [completedCluster],
+  );
 
-    const tzCounts: Record<string, number> = {};
-    const tzTotals: Record<string, number> = {};
-    states.forEach(s => {
-      tzTotals[s.timezone] = (tzTotals[s.timezone] || 0) + 1;
-      if (clicked.includes(s.code)) {
-        tzCounts[s.timezone] = (tzCounts[s.timezone] || 0) + 1;
-      }
-    });
-
-    const byTimezone = Object.keys(tzTotals).map(tz => ({
-      label: tz,
-      count: tzCounts[tz] || 0,
-      total: tzTotals[tz],
-    }));
-
-    const coastCounts: Record<string, number> = {};
-    const coastTotals: Record<string, number> = {};
-    states.forEach(s => {
-      const coast = s.coast || 'Inland';
-      coastTotals[coast] = (coastTotals[coast] || 0) + 1;
-      if (clicked.includes(s.code)) {
-        coastCounts[coast] = (coastCounts[coast] || 0) + 1;
-      }
-    });
-
-    const byCoast = Object.keys(coastTotals).map(coast => ({
-      label: coast,
-      count: coastCounts[coast] || 0,
-      total: coastTotals[coast],
-    }));
-
-    return { byCountry, byTimezone, byCoast };
-  }, [states, clicked]);
 
   useEffect(() => {
     localStorage.setItem('atlas_passportOpen', passportOpen.toString());
@@ -180,16 +145,14 @@ export default function MapExplorerPage() {
     localStorage.setItem('atlas_showLegend', showLegend.toString());
   }, [showLegend]);
 
-  const passportTrivia = useMemo(() => {
-    if (clicked.length === 0) return null;
-    const exploredStates = states.filter(s => clicked.includes(s.code) && s.trivia && s.trivia.length > 0);
-    if (exploredStates.length === 0) return null;
-    const seed = clicked.join('|');
-    const selectedState = exploredStates[hashString(seed) % exploredStates.length];
-    const triviaList = selectedState.trivia || [];
-    const trivia = triviaList[hashString(`${seed}:${selectedState.code}`) % triviaList.length];
-    return { name: selectedState.name, text: trivia };
-  }, [clicked, states]);
+  useEffect(() => {
+    if (selectedTimezone) {
+      localStorage.setItem('atlas_selectedTimezone', selectedTimezone);
+    } else {
+      localStorage.removeItem('atlas_selectedTimezone');
+    }
+  }, [selectedTimezone]);
+
 
   useEffect(() => {
     return () => {
@@ -299,6 +262,7 @@ export default function MapExplorerPage() {
   const MilestoneIcon = milestonePopup ? MILESTONE_ICON_COMPONENTS[milestonePopup.count] ?? Trophy : Trophy;
 
   return (
+    <>
     <AppLayout>
       {phase === 'intro' ? (
         <main className="flex min-h-screen items-center justify-center bg-atlas-warm p-4 sm:p-6 lg:p-8">
@@ -417,18 +381,18 @@ export default function MapExplorerPage() {
 
           <div className="relative flex-1 overflow-hidden">
             {/* Interactive Map */}
-            <div className="absolute inset-0 z-0 p-4 sm:p-6 lg:p-8">
+            <div className="absolute inset-0 p-4 sm:p-6 lg:p-8">
               <InteractiveMap
                 onRegionClick={handleRegionClick}
                 onRegionHover={(code, pos) => setHoveredRegion(code && pos ? { code, pos } : null)}
                 highlightedCodes={clicked}
                 masteredCodes={clicked}
                 explorationOrder={explorationOrder}
-                pulsingClusterCodes={completedCluster ? CLUSTER_CHECKPOINTS[completedCluster] || [] : []}
+                pulsingClusterCodes={pulsingClusterCodes}
                 activeCode={activeCode}
                 mode="explore"
                 timezoneMap={timezoneMap}
-                hoveredTimezone={hoveredTimezone}
+                hoveredTimezone={selectedTimezone ?? hoveredTimezone}
               />
             </div>
 
@@ -450,14 +414,12 @@ export default function MapExplorerPage() {
               >
                 <svg
                   viewBox={`${regionFlight.bbox.x} ${regionFlight.bbox.y} ${regionFlight.bbox.width} ${regionFlight.bbox.height}`}
-                  className="h-full w-full overflow-visible drop-shadow-2xl"
+                  className="h-full w-full overflow-hidden drop-shadow-2xl"
                 >
                   <path
                     d={regionFlight.pathD}
                     fill={regionFlight.fill}
-                    stroke="var(--atlas-accent)"
-                    strokeWidth="2.5"
-                    vectorEffect="non-scaling-stroke"
+                    stroke="none"
                   />
                 </svg>
               </div>
@@ -538,7 +500,7 @@ export default function MapExplorerPage() {
                 />
               </div>
             ) : (
-              <div className="absolute bottom-6 right-6 z-10 hidden w-80 flex-col gap-4 sm:flex lg:w-96 animate-fade-in">
+              <div className="absolute bottom-6 right-6 z-[55] hidden w-80 flex-col gap-4 sm:flex lg:w-96 animate-fade-in">
                 <div className="rounded-3xl bg-atlas-card p-6 shadow-2xl border border-atlas-border backdrop-blur-md">
                   <div className="flex items-center gap-3 mb-4 pb-4 border-b border-atlas-border">
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-atlas-warm text-atlas-ink shadow-inner border border-atlas-border">
@@ -589,157 +551,38 @@ export default function MapExplorerPage() {
 
                 {showLegend && (
                   <div className="rounded-3xl bg-atlas-card p-6 shadow-2xl border border-atlas-border animate-pop-in backdrop-blur-md">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-atlas-muted mb-4">Timezone Fills</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-3.5 w-3.5 rounded-lg bg-[#2E7D32] shadow-sm" />
-                        <span className="text-xs font-bold text-atlas-ink">Eastern (EST)</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-3.5 w-3.5 rounded-lg bg-[#1565C0] shadow-sm" />
-                        <span className="text-xs font-bold text-atlas-ink">Central (CST)</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-3.5 w-3.5 rounded-lg bg-[#EF6C00] shadow-sm" />
-                        <span className="text-xs font-bold text-atlas-ink">Mountain (MST)</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-3.5 w-3.5 rounded-lg bg-[#C62828] shadow-sm" />
-                        <span className="text-xs font-bold text-atlas-ink">Pacific (PST)</span>
-                      </div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-atlas-muted mb-1">Timezone Fills</h4>
+                    <p className="text-xs text-atlas-muted mb-3 font-medium">Tap a zone to highlight it</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        { tz: 'EST', label: 'Eastern' },
+                        { tz: 'CST', label: 'Central' },
+                        { tz: 'MST', label: 'Mountain' },
+                        { tz: 'PST', label: 'Pacific' },
+                        { tz: 'AKST', label: 'Alaska' },
+                        { tz: 'HST', label: 'Hawaii' },
+                        { tz: 'AST', label: 'Atlantic' },
+                        { tz: 'NST', label: 'Newfoundland' },
+                      ] as const).map(({ tz, label }) => (
+                        <button
+                          key={tz}
+                          type="button"
+                          onClick={() => setSelectedTimezone(prev => prev === tz ? null : tz)}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all border ${selectedTimezone === tz ? 'border-atlas-ink bg-atlas-warm shadow-md' : 'border-transparent hover:bg-atlas-warm/60'}`}
+                        >
+                          <div
+                            className="h-3.5 w-3.5 rounded-md shadow-sm flex-shrink-0"
+                            style={{ backgroundColor: TZ_FILLS[tz] }}
+                          />
+                          <span className="text-xs font-bold text-atlas-ink leading-tight">{label} ({tz})</span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Atlas Passport Toggle */}
-            <button
-              onClick={() => setPassportOpen(!passportOpen)}
-              className={`absolute bottom-6 left-6 z-50 flex items-center gap-2 btn-chunky px-5 py-3 text-xs shadow-2xl transition-all ${passportOpen ? 'btn-chunky-orange' : 'btn-chunky-primary'}`}
-            >
-              <span>{passportOpen ? '📖' : '🛂'}</span>
-              {passportOpen ? 'Close Passport' : 'Atlas Passport'}
-            </button>
-
-            {/* Atlas Passport Drawer */}
-            <div
-              className={`absolute bottom-0 left-0 right-0 z-40 max-h-[85vh] w-full overflow-y-auto rounded-t-[3rem] bg-atlas-warm p-8 sm:p-10 lg:p-12 transition-transform duration-500 ease-in-out border-t border-atlas-border shadow-[0_-20px_50px_rgba(0,0,0,0.15)] ${
-                passportOpen ? 'translate-y-0' : 'translate-y-full'
-              }`}
-            >
-              <div className="mx-auto max-w-6xl pb-16 pt-6">
-                <div className="mb-10 flex items-center justify-between border-b border-atlas-border pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-atlas-warm text-2xl shadow-inner border border-white/10 text-atlas-ink">
-                      🛂
-                    </div>
-                    <div>
-                      <h2 className="font-serif text-3xl font-black text-atlas-ink tracking-tight">Atlas Passport</h2>
-                      <p className="text-xs text-atlas-muted font-medium mt-0.5">Your Exploration Progress</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setPassportOpen(false)}
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl bg-atlas-card text-atlas-muted hover:bg-atlas-border hover:text-atlas-ink border border-atlas-border transition-all"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                  {/* Stats by Country */}
-                  <div className="rounded-3xl bg-atlas-card p-6 border border-atlas-border shadow-xl">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-atlas-gold mb-6 flex items-center gap-2">
-                      <span>🇺🇸</span> Countries
-                    </h3>
-                    <div className="space-y-5">
-                      {byCountry.map((item) => (
-                        <div key={item.label}>
-                          <div className="flex justify-between text-xs font-bold text-white mb-1.5">
-                            <span>{item.label}</span>
-                            <span className="font-mono text-atlas-muted">{item.count} / {item.total}</span>
-                          </div>
-                          <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                            <div
-                              className="h-full bg-atlas-gold transition-all duration-500 shadow-[0_0_10px_rgba(255,153,0,0.5)]"
-                              style={{ width: `${(item.count / item.total) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Stats by Timezone */}
-                  <div className="rounded-3xl bg-atlas-card p-6 border border-atlas-border shadow-xl">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-atlas-accent mb-6 flex items-center gap-2">
-                      <span>⏰</span> Timezones
-                    </h3>
-                    <div className="space-y-5">
-                      {byTimezone.map((item) => (
-                        <div key={item.label}>
-                          <div className="flex justify-between text-xs font-bold text-white mb-1.5">
-                            <span>{item.label}</span>
-                            <span className="font-mono text-atlas-muted">{item.count} / {item.total}</span>
-                          </div>
-                          <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                            <div
-                              className="h-full bg-atlas-accent transition-all duration-500 shadow-[0_0_10px_rgba(46,125,50,0.5)]"
-                              style={{ width: `${(item.count / item.total) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Stats by Coast */}
-                  <div className="rounded-3xl bg-atlas-card p-6 border border-atlas-border shadow-xl flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase tracking-widest text-atlas-ink mb-6 flex items-center gap-2">
-                        <span>🌊</span> Coastal Regions
-                      </h3>
-                      <div className="space-y-5">
-                        {byCoast.map((item) => (
-                          <div key={item.label}>
-                          <div className="flex justify-between text-xs font-bold text-atlas-ink mb-1.5">
-                              <span>{item.label}</span>
-                              <span className="font-mono text-atlas-muted">{item.count} / {item.total}</span>
-                            </div>
-                          <div className="h-2 w-full bg-atlas-warm rounded-full overflow-hidden border border-atlas-border shadow-inner">
-                              <div
-                                className="h-full bg-atlas-ink/60 transition-all duration-500"
-                                style={{ width: `${(item.count / item.total) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Passport Trivia */}
-                    <div className="mt-8 rounded-2xl bg-atlas-card p-5 border border-atlas-border shadow-inner">
-                      {passportTrivia ? (
-                        <div>
-                          <p className="text-xs font-black text-atlas-gold uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                            <span>💡</span> Regional Note
-                          </p>
-                          <p className="text-xs text-atlas-ink leading-relaxed font-medium">
-                            {passportTrivia.text}
-                          </p>
-                          <p className="text-xs text-atlas-muted mt-3 text-right font-medium">— {passportTrivia.name}</p>
-                        </div>
-                      ) : (
-                        <div className="p-3 opacity-40 text-xs text-atlas-muted leading-relaxed italic text-center">
-                          "Explore regions on the map to discover facts"
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* First-Run Guided Tour (C1) */}
@@ -782,5 +625,154 @@ export default function MapExplorerPage() {
         </main>
       )}
     </AppLayout>
+    {phase === 'exploring' && createPortal(
+      <>
+        <button
+          onClick={() => setPassportOpen(!passportOpen)}
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 btn-chunky px-5 py-3 text-xs shadow-2xl transition-all whitespace-nowrap ${passportOpen ? 'btn-chunky-orange' : 'btn-chunky-primary'}`}
+        >
+          <span>{passportOpen ? '📖' : '🛂'}</span>
+          {passportOpen ? 'Close Passport' : 'Atlas Passport'}
+        </button>
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-[9998] max-h-[85vh] w-full overflow-y-auto rounded-t-[3rem] bg-atlas-warm p-8 sm:p-10 lg:p-12 transition-transform duration-500 ease-in-out border-t border-atlas-border shadow-[0_-20px_50px_rgba(0,0,0,0.15)] ${
+            passportOpen ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        >
+          <div className="mx-auto max-w-6xl pb-16 pt-6">
+            <div className="mb-10 flex items-center justify-between border-b border-atlas-border pb-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-atlas-warm text-2xl shadow-inner border border-white/10 text-atlas-ink">
+                  🛂
+                </div>
+                <div>
+                  <h2 className="font-serif text-3xl font-black text-atlas-ink tracking-tight">Atlas Passport</h2>
+                  <p className="text-xs text-atlas-muted font-medium mt-0.5">Your Exploration Progress</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPassportOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-atlas-card text-atlas-muted hover:bg-atlas-border hover:text-atlas-ink border border-atlas-border transition-all"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Overall progress */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center text-xs font-black text-atlas-ink mb-2">
+                <span className="uppercase tracking-widest">Overall Progress</span>
+                <span className="font-mono text-atlas-muted">{clicked.length} / {states.length || TOTAL_REGIONS} explored</span>
+              </div>
+              <div className="h-2.5 w-full bg-atlas-warm rounded-full overflow-hidden border border-atlas-border shadow-inner">
+                <div
+                  className="h-full bg-atlas-accent transition-all duration-500 shadow-[0_0_10px_rgba(46,125,50,0.5)]"
+                  style={{ width: `${(clicked.length / (states.length || TOTAL_REGIONS)) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-5 mb-8 text-xs font-bold text-atlas-muted">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-atlas-accent shadow-sm" />
+                <span>Explored</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-atlas-border shadow-sm" />
+                <span>Pending</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-1.5 rounded-full bg-atlas-gold opacity-70" />
+                <span>Timezone color</span>
+              </div>
+            </div>
+
+            {/* US States */}
+            <div className="mb-10">
+              <h3 className="text-xs font-black uppercase tracking-widest text-atlas-gold mb-4 flex items-center gap-2">
+                <span>🇺🇸</span> United States
+                <span className="ml-auto font-mono text-atlas-muted normal-case tracking-normal">
+                  {states.filter(s => s.country === 'US' && clicked.includes(s.code)).length} / {states.filter(s => s.country === 'US').length}
+                </span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {states
+                  .filter(s => s.country === 'US')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(state => {
+                    const isExplored = clicked.includes(state.code);
+                    const tzColor = TZ_FILLS[state.timezone] ?? '#888888';
+                    return (
+                      <div
+                        key={state.code}
+                        className={`flex items-center gap-2 rounded-xl px-2.5 py-2 border transition-all ${
+                          isExplored
+                            ? 'bg-atlas-accent/10 border-atlas-accent/40 text-atlas-ink'
+                            : 'bg-atlas-warm border-atlas-border text-atlas-muted'
+                        }`}
+                      >
+                        <div
+                          className="w-1 self-stretch rounded-full flex-shrink-0 min-h-[28px]"
+                          style={{ backgroundColor: isExplored ? tzColor : '#d0c9be' }}
+                        />
+                        <div className="min-w-0">
+                          <div className="text-xs font-black leading-tight truncate">{state.name}</div>
+                          <div className="text-xs font-mono opacity-50 leading-tight">{state.code}</div>
+                        </div>
+                        {isExplored && (
+                          <span className="ml-auto text-atlas-accent text-xs flex-shrink-0">✓</span>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Canadian Provinces */}
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-widest text-atlas-accent mb-4 flex items-center gap-2">
+                <span>🍁</span> Canadian Provinces
+                <span className="ml-auto font-mono text-atlas-muted normal-case tracking-normal">
+                  {states.filter(s => s.country === 'CA' && clicked.includes(s.code)).length} / {states.filter(s => s.country === 'CA').length}
+                </span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {states
+                  .filter(s => s.country === 'CA')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(state => {
+                    const isExplored = clicked.includes(state.code);
+                    const tzColor = TZ_FILLS[state.timezone] ?? '#888888';
+                    return (
+                      <div
+                        key={state.code}
+                        className={`flex items-center gap-2 rounded-xl px-2.5 py-2 border transition-all ${
+                          isExplored
+                            ? 'bg-atlas-accent/10 border-atlas-accent/40 text-atlas-ink'
+                            : 'bg-atlas-warm border-atlas-border text-atlas-muted'
+                        }`}
+                      >
+                        <div
+                          className="w-1 self-stretch rounded-full flex-shrink-0 min-h-[28px]"
+                          style={{ backgroundColor: isExplored ? tzColor : '#d0c9be' }}
+                        />
+                        <div className="min-w-0">
+                          <div className="text-xs font-black leading-tight truncate">{state.name}</div>
+                          <div className="text-xs font-mono opacity-50 leading-tight">{state.code}</div>
+                        </div>
+                        {isExplored && (
+                          <span className="ml-auto text-atlas-accent text-xs flex-shrink-0">✓</span>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </>,
+      document.body
+    )}
+    </>
   );
 }
