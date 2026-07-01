@@ -5,7 +5,7 @@ milestone_name: milestone
 status: active
 stopped_at: Phase 7 complete
 last_updated: "2026-07-01T00:00:00.000Z"
-last_activity: 2026-07-01 — Quick task: Educational institutions added to Discover North America (all 63 regions)
+last_activity: 2026-07-01 — Quick task: Discover cards converted to 100% education content per manager ask
 progress:
   total_phases: 8
   completed_phases: 2
@@ -83,7 +83,8 @@ None.
 | 2026-05-21 | Fix tz-sorter (Timezone Sort) blank screen — restore missing useParticles/AnimatedCard imports | 7198353 | complete ✓ |
 | 2026-06-19 | Fix Vite `@/` import resolution — remove stray `vite.config.js` shadowing `vite.config.ts` | — | complete ✓ |
 | 2026-07-01 | SCORM 1.2 packaging for LMS delivery (Reach 360 / SuccessFactors) — `npm run build:scorm` produces uploadable zip | pending | complete ✓ |
-| 2026-07-01 | Discover North America: add famous educational institutions to "Known For" + education trivia to "Did you know?" for all 63 regions | pending | complete ✓ |
+| 2026-07-01 | Discover North America: add famous educational institutions to "Known For" + education trivia to "Did you know?" for all 63 regions | 26f160f | complete ✓ |
+| 2026-07-01 | Discover cards → 100% education content (all pills = institutions, all trivia = education facts) per manager ask | pending | complete ✓ |
 
 ## Deferred Items
 
